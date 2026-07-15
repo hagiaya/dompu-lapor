@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Camera } from 'lucide-react';
-import { Camera } from 'lucide-react';
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), {
   ssr: false,
