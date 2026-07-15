@@ -1,0 +1,182 @@
+'use client';
+import { Target, Map as MapIcon, CheckCircle2, Navigation, Camera, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+
+export default function PetugasDashboard() {
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Stats
+  const [completedCount, setCompletedCount] = useState(0);
+
+  // File upload states
+  const [photoFiles, setPhotoFiles] = useState<{ [key: string]: File | null }>({});
+  const [isSubmitting, setIsSubmitting] = useState<{ [key: string]: boolean }>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    
+    // In a real app we filter by `employee_id = current_user.id`.
+    // Here we just fetch all IN_PROGRESS tasks to show the UI works.
+    const { data: pData } = await supabase.from('report_progress')
+      .select(`
+        id, report_id, status, description, created_at,
+        reports ( ticket_id, complaint, lat, lng )
+      `)
+      .eq('status', 'IN_PROGRESS')
+      .order('created_at', { ascending: false });
+      
+    if (pData) setTasks(pData);
+
+    // Fetch completed count
+    const { count } = await supabase.from('report_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'COMPLETED');
+      
+    setCompletedCount(count || 0);
+
+    setLoading(false);
+  };
+
+  const handlePhotoSelect = (taskId: string, file: File) => {
+    setPhotoFiles(prev => ({ ...prev, [taskId]: file }));
+  };
+
+  const handleSelesai = async (progressId: string, reportId: string) => {
+    const file = photoFiles[progressId];
+    if (!file) {
+      alert('Harap unggah bukti foto penyelesaian tugas terlebih dahulu.');
+      return;
+    }
+
+    setIsSubmitting(prev => ({ ...prev, [progressId]: true }));
+    let uploadedPhotoUrl = null;
+
+    try {
+      const imgFormData = new FormData();
+      imgFormData.append('image', file);
+      const imgBbKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || '2960a369656fb39fbd0c885e34be6228';
+      
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgBbKey}`, {
+        method: 'POST',
+        body: imgFormData
+      });
+      const data = await res.json();
+      if (data.success) {
+        uploadedPhotoUrl = data.data.url;
+      }
+    } catch (err) {
+      console.error("ImgBB error", err);
+      alert('Gagal mengunggah gambar. Silakan coba lagi.');
+      setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
+      return;
+    }
+
+    // Update report_progress
+    const { error: pError } = await supabase.from('report_progress')
+      .update({ status: 'COMPLETED', evidence_url: uploadedPhotoUrl })
+      .eq('id', progressId);
+
+    // Update reports
+    const { error: rError } = await supabase.from('reports')
+      .update({ status: 'COMPLETED' })
+      .eq('id', reportId);
+
+    if (pError || rError) {
+      alert('Terjadi kesalahan saat menyelesaikan tugas.');
+      console.error(pError, rError);
+    } else {
+      alert('Tugas berhasil diselesaikan!');
+      fetchData(); // Refresh tasks
+    }
+    
+    setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
+  };
+
+  return (
+    <div style={{ padding: '1.25rem', background: 'var(--background)', minHeight: '100vh' }}>
+      {/* Profile Card */}
+      <div style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', padding: '1.5rem', borderRadius: '1.25rem', boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.3)', marginBottom: '1.5rem', color: 'white' }}>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: '900', marginBottom: '0.25rem' }}>Halo, Petugas</h1>
+        <p style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '1rem' }}>Tim Reaksi Cepat</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1rem' }}>
+           <p style={{ fontSize: '0.8rem', opacity: 0.8, textTransform: 'uppercase', letterSpacing: '1px' }}>Total Tugas Selesai</p>
+           <p style={{ fontSize: '2rem', fontWeight: '900', lineHeight: 1 }}>{completedCount} <span style={{fontSize:'0.9rem', fontWeight:'normal'}}>Tiket</span></p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+        <Target size={20} color="var(--primary-color)"/> 
+        <h2 style={{ fontSize: '1.1rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>Daftar Tugas Saat Ini</h2>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Memuat tugas...</div>
+      ) : tasks.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'white', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
+          <AlertCircle size={32} style={{ margin: '0 auto 0.5rem auto', opacity: 0.5 }}/>
+          Tidak ada tugas aktif saat ini.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {tasks.map(task => (
+            <div key={task.id} className="glass-panel" style={{ padding: '1.25rem', borderRadius: '1.25rem', borderTop: '4px solid var(--warning-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div>
+                  <span style={{ background: '#fef3c7', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'inline-block' }}>{task.reports?.ticket_id}</span>
+                  <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: 1.3 }}>Instruksi: {task.description}</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>Keluhan Warga: "{task.reports?.complaint}"</p>
+                </div>
+              </div>
+              
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1.25rem' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                   <div style={{ width: '48px', height: '48px', background: '#e2e8f0', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', flexShrink: 0 }}>
+                     <MapIcon size={24} />
+                   </div>
+                   <div>
+                     <p style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Lokasi Titik Peta</p>
+                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{task.reports?.lat ? `${task.reports.lat.toFixed(4)}, ${task.reports.lng.toFixed(4)}` : 'Tidak ada koordinat'}</p>
+                   </div>
+                 </div>
+                 {task.reports?.lat && (
+                   <button 
+                     onClick={() => window.open(`https://www.google.com/maps?q=${task.reports.lat},${task.reports.lng}`, '_blank')}
+                     className="btn-secondary" 
+                     style={{ width: '100%', padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.9rem', background: 'white' }}>
+                     <Navigation size={16}/> Buka Maps
+                   </button>
+                 )}
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                <h4 style={{ marginBottom: '0.75rem', fontSize: '0.95rem' }}>Unggah Bukti Selesai</h4>
+                <label style={{ display: 'block', border: '2px dashed var(--border-color)', padding: '1.5rem', textAlign: 'center', borderRadius: '0.75rem', cursor: 'pointer', background: '#f8fafc', marginBottom: '1rem' }}>
+                  <Camera size={24} color={photoFiles[task.id] ? "var(--success-color)" : "var(--text-secondary)"} style={{ margin: '0 auto 0.5rem auto' }}/>
+                  <p style={{ color: photoFiles[task.id] ? "var(--success-color)" : "var(--text-secondary)", fontSize: '0.85rem' }}>
+                    {photoFiles[task.id] ? photoFiles[task.id]?.name : 'Ketuk untuk pilih foto'}
+                  </p>
+                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) handlePhotoSelect(task.id, e.target.files[0]);
+                  }} />
+                </label>
+                <button 
+                  onClick={() => handleSelesai(task.id, task.report_id)}
+                  disabled={isSubmitting[task.id]}
+                  className="btn-primary" 
+                  style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', borderRadius: '0.75rem', opacity: isSubmitting[task.id] ? 0.7 : 1 }}>
+                   <CheckCircle2 size={18} /> {isSubmitting[task.id] ? 'Mengunggah & Mengirim...' : 'Selesai & Kirim'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
