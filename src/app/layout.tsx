@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sistem Lapor - Kabupaten Dompu",
-  description: "Layanan Aspirasi dan Pengaduan Online Masyarakat Kabupaten Dompu",
+  title: "SiMAJU - Sistem informasi Masyarakat menuju Dompu Maju",
+  description: "Sistem informasi Masyarakat menuju Dompu Maju (SiMAJU)",
 };
 
 export default function RootLayout({

@@ -18,9 +18,12 @@ export default function OPDLayout({ children }: { children: React.ReactNode }) {
     <ProtectedRoute allowedRoles={['OPD', 'ADMIN']}>
       <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
         <aside style={{ width: '280px', background: 'var(--surface)', borderRight: '1px solid var(--border-color)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-sm)' }}>
-        <div style={{ marginBottom: '2.5rem', padding: '0 1rem' }}>
-          <h2 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.5px' }}>Sistem Lapor</h2>
-          <p style={{ color: 'var(--secondary-color)', fontSize: '0.9rem', fontWeight: '600' }}>Panel Kepala OPD</p>
+        <div style={{ marginBottom: '2.5rem', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="40" height="40" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>SiMAJU</h2>
+          </div>
+          <p style={{ color: 'var(--secondary-color)', fontSize: '0.9rem', fontWeight: '600', marginLeft: '3.25rem' }}>Panel Kepala OPD</p>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           <Link href="/opd" className={`nav-item ${pathname === '/opd' ? 'active' : ''}`}><Briefcase size={20} /> Overview</Link>

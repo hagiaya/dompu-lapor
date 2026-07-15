@@ -4,6 +4,8 @@ import { MessageSquarePlus, Search, Send, MapPin, User, Phone, CheckCircle, Shie
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { Camera } from 'lucide-react';
 import { Camera } from 'lucide-react';
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), {
@@ -131,7 +133,8 @@ export default function Home() {
         {/* Header / Top Bar */}
         <header style={{ padding: '1rem 1.25rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
           <h2 style={{ color: 'var(--primary-color)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Shield size={20} color="var(--secondary-color)"/> Lapor Dompu
+            <Image src="/logo copy.jpeg" alt="SiMAJU Logo" width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover' }} />
+            SiMAJU
           </h2>
           <Link href="/login" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>
             Masuk Staff
@@ -143,7 +146,7 @@ export default function Home() {
           
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <h1 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '0.75rem', color: 'var(--primary-color)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>
-              Layanan Aspirasi & <br /> Pengaduan Rakyat
+              Sistem Informasi Masyarakat <br /> menuju <span style={{ color: 'var(--secondary-color)' }}>Dompu Maju</span>
             </h1>
             <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               Sampaikan keluhan fasilitas publik Dompu. Cepat, Mudah, dan Transparan.
