@@ -1,8 +1,10 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+import { supabase } from '@/lib/supabaseClient';
 
 // Fix leaflet icon paths
 const icon = L.icon({
@@ -14,12 +16,30 @@ const icon = L.icon({
 });
 
 export default function MapComponent({ center, zoom }: { center: [number, number], zoom: number }) {
-  // Contoh titik-titik laporan di Kab. Dompu
-  const mockReports = [
-    { id: 1, pos: [-8.5333, 118.4667], type: 'Jalan Rusak', status: 'Pending' },
-    { id: 2, pos: [-8.5533, 118.4267], type: 'Irigasi Tersumbat', status: 'Dikerjakan' },
-    { id: 3, pos: [-8.5133, 118.4967], type: 'Lampu Jalan Mati', status: 'Selesai' }
-  ];
+  const [reports, setReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchReports() {
+      const { data, error } = await supabase
+        .from('reports')
+        .select(`
+          id,
+          ticket_id,
+          complaint,
+          status,
+          lat,
+          lng,
+          categories(name)
+        `)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
+
+      if (data) {
+        setReports(data);
+      }
+    }
+    fetchReports();
+  }, []);
 
   return (
     <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}>
@@ -28,18 +48,15 @@ export default function MapComponent({ center, zoom }: { center: [number, number
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-      {mockReports.map((report) => (
-        <Marker key={report.id} position={report.pos as [number, number]} icon={icon}>
+      {reports.map((report) => (
+        <Marker key={report.id} position={[report.lat, report.lng]} icon={icon}>
           <Popup>
-            <strong>{report.type}</strong><br/>
-            Status: {report.status}
+            <strong>{report.categories?.name || 'Keluhan'}</strong><br/>
+            Status: {report.status}<br/>
+            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{report.ticket_id}</span>
           </Popup>
         </Marker>
       ))}
-
-      {/* Contoh Heatmap area */}
-      <Circle center={[-8.5333, 118.4667]} pathOptions={{ fillColor: 'red', color: 'red' }} radius={2000} />
-      <Circle center={[-8.5533, 118.4267]} pathOptions={{ fillColor: 'orange', color: 'orange' }} radius={1000} />
     </MapContainer>
   );
 }
