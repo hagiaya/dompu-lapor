@@ -57,7 +57,7 @@ export default function LandingPage() {
               Platform Pengaduan Resmi
             </div>
             <h1 style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--text-primary)', lineHeight: 1.1, letterSpacing: '-1px' }}>
-              Sistem Informasi Masyarakat menuju <span style={{ color: 'var(--success-color)' }}>Dompu Maju</span>
+              Sistem informasi Masyarakat menuju <span style={{ color: 'var(--success-color)' }}>Dompu Maju</span>
             </h1>
             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '90%' }}>
               Wadah penyampaian aspirasi dan keluhan fasilitas publik masyarakat Kabupaten Dompu. Cepat, Mudah, dan Transparan langsung ke instansi terkait.
