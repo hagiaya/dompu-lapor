@@ -1,8 +1,12 @@
 'use client';
 import Map from '@/components/Map';
-import { Shield, Layers, LayoutDashboard, Send, MapPin, Activity, BellRing } from 'lucide-react';
+import { Shield, Layers, LayoutDashboard, Send, MapPin, Activity, BellRing, PieChart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function AdminDashboard() {
   const [totalReports, setTotalReports] = useState(0);
@@ -10,6 +14,9 @@ export default function AdminDashboard() {
   const [topOpd, setTopOpd] = useState('-');
   const [activities, setActivities] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [chartDataKategori, setChartDataKategori] = useState<any>(null);
+  const [chartDataKecamatan, setChartDataKecamatan] = useState<any>(null);
+  const [chartDataDesa, setChartDataDesa] = useState<any>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -46,6 +53,48 @@ export default function AdminDashboard() {
 
         // Recent 5 activities
         setActivities(reports.slice(0, 5));
+      }
+
+      // Fetch all reports for stats
+      const { data: allReports } = await supabase.from('reports').select(`
+        categories ( name ),
+        districts ( name ),
+        villages ( name )
+      `);
+
+      if (allReports) {
+        const catCounts: Record<string, number> = {};
+        const kecCounts: Record<string, number> = {};
+        const desaCounts: Record<string, number> = {};
+
+        allReports.forEach(r => {
+           const cat = r.categories?.name || 'Lainnya';
+           const kec = r.districts?.name || 'Lainnya';
+           const desa = r.villages?.name || 'Lainnya';
+           catCounts[cat] = (catCounts[cat] || 0) + 1;
+           kecCounts[kec] = (kecCounts[kec] || 0) + 1;
+           desaCounts[desa] = (desaCounts[desa] || 0) + 1;
+        });
+        
+        const formatPieData = (counts: Record<string, number>, maxItems = 6) => {
+           const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+           const top = sorted.slice(0, maxItems);
+           const others = sorted.slice(maxItems).reduce((sum, [, count]) => sum + count, 0);
+           if (others > 0) top.push(['Lainnya', others]);
+           
+           return {
+             labels: top.map(item => item[0]),
+             datasets: [{
+               data: top.map(item => item[1]),
+               backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#14b8a6', '#84cc16'],
+               borderWidth: 1
+             }]
+           }
+        }
+
+        setChartDataKategori(formatPieData(catCounts));
+        setChartDataKecamatan(formatPieData(kecCounts));
+        setChartDataDesa(formatPieData(desaCounts, 8));
       }
     }
     fetchData();
@@ -146,19 +195,48 @@ export default function AdminDashboard() {
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)' }}>
             <Activity size={22} color="var(--warning-color)" /> Log Aktivitas Sistem
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {activities.length > 0 ? activities.map((act, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
-                <div style={{ width: '10px', height: '10px', background: 'var(--secondary-color)', borderRadius: '50%', marginTop: '6px' }}></div>
-                <div>
-                  <p style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Tiket {act.ticket_id} Masuk</p>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kategori: {act.categories?.name || '-'}. Keluhan: "{act.complaint?.substring(0, 30)}..."</p>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem', display: 'block' }}>{new Date(act.created_at).toLocaleString('id-ID')}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {activities.length > 0 ? activities.map(act => (
+              <div key={act.ticket_id} style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success-color)' }}></div>
+                  <strong style={{ color: 'var(--primary-color)' }}>Tiket {act.ticket_id} Masuk</strong>
                 </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Kategori: {act.categories?.name || '-'}. Keluhan: "{act.complaint?.substring(0, 50)}..."
+                </p>
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                  {new Date(act.created_at).toLocaleString('id-ID')}
+                </p>
               </div>
             )) : (
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Belum ada aktivitas laporan masuk.</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Belum ada aktivitas.</p>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Chart Area */}
+      <h2 style={{ marginTop: '3rem', marginBottom: '1.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)' }}>
+        <PieChart size={24} color="var(--secondary-color)" /> Statistik Distribusi Laporan
+      </h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', marginBottom: '2.5rem' }}>
+        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1.5rem', fontWeight: '600' }}>Berdasarkan Kategori</h3>
+          <div style={{ width: '100%', maxWidth: '300px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {chartDataKategori ? <Pie data={chartDataKategori} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }} /> : <p>Memuat...</p>}
+          </div>
+        </div>
+        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1.5rem', fontWeight: '600' }}>Berdasarkan Kecamatan</h3>
+          <div style={{ width: '100%', maxWidth: '300px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {chartDataKecamatan ? <Pie data={chartDataKecamatan} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }} /> : <p>Memuat...</p>}
+          </div>
+        </div>
+        <div className="glass-panel" style={{ padding: '2rem', borderRadius: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3 style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1.5rem', fontWeight: '600' }}>Berdasarkan Desa (Top 8)</h3>
+          <div style={{ width: '100%', maxWidth: '300px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {chartDataDesa ? <Pie data={chartDataDesa} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }} /> : <p>Memuat...</p>}
           </div>
         </div>
       </div>
