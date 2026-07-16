@@ -30,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/laporan" className={`nav-item ${pathname.includes('/admin/laporan') ? 'active' : ''}`}><FileText size={20} /> Manajemen Laporan</Link>
           <Link href="/admin/kategori" className={`nav-item ${pathname.includes('/admin/kategori') ? 'active' : ''}`}><Layers size={20} /> Kategori Keluhan</Link>
           <Link href="/admin/opd" className={`nav-item ${pathname.includes('/admin/opd') ? 'active' : ''}`}><Users size={20} /> Manajemen OPD</Link>
+          <Link href="/admin/users" className={`nav-item ${pathname.includes('/admin/users') ? 'active' : ''}`}><Users size={20} /> Manajemen Akun</Link>
           <Link href="/admin/heatmap" className={`nav-item ${pathname.includes('/admin/heatmap') ? 'active' : ''}`}><MapIcon size={20} /> Peta Heatmap</Link>
         </nav>
         <div style={{ padding: '1rem', borderTop: '1px solid var(--border-color)' }}>
