@@ -7,6 +7,7 @@ export default function LaporanAdmin() {
   const [reports, setReports] = useState<any[]>([]);
   const [opds, setOpds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -16,8 +17,10 @@ export default function LaporanAdmin() {
     setLoading(true);
     // Fetch reports
     const { data: rData } = await supabase.from('reports').select(`
-      id, ticket_id, reporter_name, reporter_wa, complaint, status, created_at, opd_id,
-      categories ( name )
+      id, ticket_id, reporter_name, reporter_wa, complaint, status, created_at, opd_id, photo_url,
+      categories ( name ),
+      districts ( name ),
+      villages ( name )
     `).order('created_at', { ascending: false });
     
     if (rData) setReports(rData);
@@ -138,7 +141,7 @@ export default function LaporanAdmin() {
                               </button>
                             </>
                           )}
-                          <button className="btn-secondary" style={{padding: '0.5rem 1rem', fontSize: '0.85rem'}}>Detail</button>
+                          <button onClick={() => setSelectedReport(r)} className="btn-secondary" style={{padding: '0.5rem 1rem', fontSize: '0.85rem'}}>Detail</button>
                         </div>
                       </td>
                     </tr>
@@ -153,6 +156,68 @@ export default function LaporanAdmin() {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {selectedReport && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ background: '#fff', borderRadius: '1rem', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}>
+            <button onClick={() => setSelectedReport(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              <X size={24} />
+            </button>
+            <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-color)', marginBottom: '0.5rem' }}>Detail Laporan</h2>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+              <div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>No. Tiket</p>
+                <p style={{ fontWeight: 'bold' }}>{selectedReport.ticket_id}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tanggal Lapor</p>
+                <p style={{ fontWeight: 'bold' }}>{new Date(selectedReport.created_at).toLocaleDateString('id-ID')}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status</p>
+                <p style={{ fontWeight: 'bold', color: getStatusColor(selectedReport.status).text }}>{selectedReport.status}</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pelapor</p>
+                <p style={{ fontWeight: 'bold' }}>{selectedReport.reporter_name}</p>
+                <p style={{ fontSize: '0.85rem' }}>{selectedReport.reporter_wa}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Lokasi</p>
+                <p style={{ fontWeight: 'bold' }}>Desa {selectedReport.villages?.name || '-'}</p>
+                <p style={{ fontSize: '0.85rem' }}>Kec. {selectedReport.districts?.name || '-'}</p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Kategori</p>
+              <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>{selectedReport.categories?.name || '-'}</p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Isi Keluhan</p>
+              <p style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
+                {selectedReport.complaint}
+              </p>
+            </div>
+
+            <div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Foto Bukti Laporan</p>
+              {selectedReport.photo_url ? (
+                <div style={{ width: '100%', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={selectedReport.photo_url} alt="Foto Laporan" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                </div>
+              ) : (
+                <div style={{ width: '100%', padding: '2rem', borderRadius: '0.5rem', background: '#f8fafc', textAlign: 'center', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                  Pelapor tidak melampirkan foto.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   ); 
 }
