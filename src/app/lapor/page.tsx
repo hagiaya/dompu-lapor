@@ -23,7 +23,8 @@ export default function Home() {
   const [ticketId, setTicketId] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-
+  const [totalAduan, setTotalAduan] = useState(0);
+  const [persenSelesai, setPersenSelesai] = useState(0);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -118,6 +119,13 @@ export default function Home() {
       
       const { data: cData } = await supabase.from('categories').select('*');
       if (cData) setCategories(cData);
+      
+      const { data: rData } = await supabase.from('reports').select('status');
+      if (rData) {
+        setTotalAduan(rData.length);
+        const selesai = rData.filter((r: any) => r.status === 'COMPLETED').length;
+        setPersenSelesai(rData.length > 0 ? (selesai / rData.length) * 100 : 0);
+      }
     };
     fetchData();
   }, []);
@@ -318,13 +326,13 @@ export default function Home() {
           <div className="glass-panel" style={{ padding: '2rem 1.5rem', borderRadius: '1.25rem', background: '#1e293b', color: 'white', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <TrendingUp size={32} color="var(--secondary-color)" style={{ marginBottom: '0.5rem', margin: '0 auto' }} />
-              <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>1.402</p>
+              <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>{totalAduan.toLocaleString('id-ID')}</p>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Aduan Masuk</p>
             </div>
             <div style={{ width: '80%', height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
             <div style={{ textAlign: 'center' }}>
               <CheckCircle size={32} color="var(--success-color)" style={{ marginBottom: '0.5rem', margin: '0 auto' }} />
-              <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>98.5%</p>
+              <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>{persenSelesai.toFixed(1).replace('.0', '')}%</p>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Diselesaikan</p>
             </div>
           </div>
