@@ -8,29 +8,29 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { reportId, employeeId, instruction } = await request.json();
+    const { progressId, reportId } = await request.json();
     
-    if (!reportId || !employeeId) {
+    if (!progressId || !reportId) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
-    // OPD assigning doesn't change the main report status to IN_PROGRESS yet. 
-    // It remains ACCEPTED until the Petugas clicks 'Terima Tugas'.
-    
-    // 1. Insert into report_progress as ACCEPTED
+    // 1. Update report_progress to IN_PROGRESS
     const { error: pError } = await supabase.from('report_progress')
-      .insert({
-        report_id: reportId,
-        status: 'ACCEPTED',
-        description: instruction,
-        employee_id: employeeId
-      });
+      .update({ status: 'IN_PROGRESS' })
+      .eq('id', progressId);
 
     if (pError) throw pError;
 
+    // 2. Update reports to IN_PROGRESS
+    const { error: rError } = await supabase.from('reports')
+      .update({ status: 'IN_PROGRESS' })
+      .eq('id', reportId);
+
+    if (rError) throw rError;
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Assign API error:', error);
+    console.error('Accept API error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

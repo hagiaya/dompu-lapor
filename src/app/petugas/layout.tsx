@@ -3,11 +3,33 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ClipboardCheck, UserCheck, History, LogOut } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function PetugasLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [newTasksCount, setNewTasksCount] = useState(0);
+
+  useEffect(() => {
+    fetchNewTasksCount();
+    
+    // Set up a simple poll or just fetch once (realtime would be better but this is fine for now)
+    const interval = setInterval(fetchNewTasksCount, 30000);
+    return () => clearInterval(interval);
+  }, [pathname]); // Refetch when route changes
+
+  const fetchNewTasksCount = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    const { count } = await supabase.from('report_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'ACCEPTED')
+      .eq('employee_id', user.id);
+      
+    if (count !== null) setNewTasksCount(count);
+  };
   
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,7 +70,11 @@ export default function PetugasLayout({ children }: { children: React.ReactNode 
           <Link href="/petugas/baru" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', color: pathname.includes('/petugas/baru') ? 'var(--secondary-color)' : 'var(--text-secondary)', textDecoration: 'none' }}>
             <div style={{ position: 'relative' }}>
               <UserCheck size={24} />
-              <span style={{ position: 'absolute', top: '-4px', right: '-6px', background: 'var(--error-color)', color: 'white', fontSize: '0.6rem', padding: '1px 5px', borderRadius: '10px', fontWeight: 'bold' }}>2</span>
+              {newTasksCount > 0 && (
+                <span style={{ position: 'absolute', top: '-4px', right: '-6px', background: 'var(--error-color)', color: 'white', fontSize: '0.6rem', padding: '1px 5px', borderRadius: '10px', fontWeight: 'bold' }}>
+                  {newTasksCount}
+                </span>
+              )}
             </div>
             <span style={{ fontSize: '0.7rem', fontWeight: pathname.includes('/petugas/baru') ? 'bold' : 'normal' }}>Tugas Baru</span>
           </Link>

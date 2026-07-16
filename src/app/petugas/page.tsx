@@ -21,22 +21,26 @@ export default function PetugasDashboard() {
   const fetchData = async () => {
     setLoading(true);
     
-    // In a real app we filter by `employee_id = current_user.id`.
-    // Here we just fetch all IN_PROGRESS tasks to show the UI works.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    // Fetch IN_PROGRESS tasks assigned to this employee
     const { data: pData } = await supabase.from('report_progress')
       .select(`
         id, report_id, status, description, created_at,
         reports ( ticket_id, complaint, lat, lng )
       `)
       .eq('status', 'IN_PROGRESS')
+      .eq('employee_id', user.id)
       .order('created_at', { ascending: false });
       
     if (pData) setTasks(pData);
 
-    // Fetch completed count
+    // Fetch completed count for this employee
     const { count } = await supabase.from('report_progress')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'COMPLETED');
+      .eq('status', 'COMPLETED')
+      .eq('employee_id', user.id);
       
     setCompletedCount(count || 0);
 
