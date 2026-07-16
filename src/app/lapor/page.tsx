@@ -96,7 +96,7 @@ export default function Home() {
     
     const { data, error } = await supabase
       .from('reports')
-      .select('status, complaint, created_at')
+      .select('status, complaint, created_at, photo_url, report_progress(status, created_at, evidence_url)')
       .eq('ticket_id', searchTicketId)
       .single();
       
@@ -276,11 +276,61 @@ export default function Home() {
                   </button>
                   
                   {searchResult && (
-                    <div style={{ marginTop: '2rem', padding: '1.25rem', border: '1px solid var(--border-color)', borderRadius: '1rem', textAlign: 'left', background: '#f8fafc' }}>
+                    <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '1rem', textAlign: 'left', background: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)' }}>
                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Status Terkini</p>
-                       <h4 style={{ fontSize: '1.3rem', color: 'var(--primary-color)', marginBottom: '0.75rem', marginTop: '0.25rem' }}>{searchResult.status}</h4>
-                       <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>"{searchResult.complaint}"</p>
-                       <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Dilaporkan pada: {new Date(searchResult.created_at).toLocaleDateString('id-ID')}</p>
+                       <h4 style={{ fontSize: '1.3rem', color: 'var(--primary-color)', marginBottom: '0.25rem', marginTop: '0.25rem' }}>{searchResult.status}</h4>
+                       <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: '1.5rem' }}>"{searchResult.complaint}"</p>
+                       
+                       {/* Timeline Progress Bar */}
+                       <div style={{ marginBottom: '2rem' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+                           <span style={{ color: ['PENDING', 'DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Terkirim</span>
+                           <span style={{ color: ['DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Diteruskan</span>
+                           <span style={{ color: ['IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Dikerjakan</span>
+                           <span style={{ color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : '' }}>Selesai</span>
+                         </div>
+                         <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                           <div style={{ 
+                             height: '100%', 
+                             background: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--primary-color)',
+                             width: searchResult.status === 'PENDING' ? '15%' : searchResult.status === 'DISPOSISI' ? '40%' : searchResult.status === 'IN_PROGRESS' ? '70%' : searchResult.status === 'COMPLETED' ? '100%' : '0%',
+                             transition: 'width 0.5s ease-in-out'
+                           }}></div>
+                         </div>
+                         <p style={{ textAlign: 'right', fontSize: '0.75rem', color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--text-secondary)', fontWeight: 'bold', marginTop: '0.35rem' }}>
+                           {searchResult.status === 'PENDING' ? '15%' : searchResult.status === 'DISPOSISI' ? '40%' : searchResult.status === 'IN_PROGRESS' ? '70%' : searchResult.status === 'COMPLETED' ? '100%' : '0%'} {searchResult.status === 'COMPLETED' ? 'Tuntas' : 'Berjalan'}
+                         </p>
+                       </div>
+
+                       {/* Before / After Photos */}
+                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                         <div>
+                           <p style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Laporan (Sebelum)</p>
+                           {searchResult.photo_url ? (
+                             <div style={{ width: '100%', height: '120px', borderRadius: '0.5rem', overflow: 'hidden', background: '#f1f5f9' }}>
+                               {/* eslint-disable-next-line @next/next/no-img-element */}
+                               <img src={searchResult.photo_url} alt="Sebelum" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                             </div>
+                           ) : (
+                             <div style={{ width: '100%', height: '120px', borderRadius: '0.5rem', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>Tanpa foto</div>
+                           )}
+                         </div>
+                         <div>
+                           <p style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Perbaikan (Sesudah)</p>
+                           {searchResult.status === 'COMPLETED' && searchResult.report_progress?.find((p:any) => p.status === 'COMPLETED')?.evidence_url ? (
+                             <div style={{ width: '100%', height: '120px', borderRadius: '0.5rem', overflow: 'hidden', background: '#f1f5f9' }}>
+                               {/* eslint-disable-next-line @next/next/no-img-element */}
+                               <img src={searchResult.report_progress.find((p:any) => p.status === 'COMPLETED').evidence_url} alt="Sesudah" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                             </div>
+                           ) : (
+                             <div style={{ width: '100%', height: '120px', borderRadius: '0.5rem', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center', padding: '0.5rem' }}>
+                               {searchResult.status === 'COMPLETED' ? 'Tanpa foto bukti' : 'Belum selesai'}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+
+                       <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>Dilaporkan pada: {new Date(searchResult.created_at).toLocaleDateString('id-ID')}</p>
                     </div>
                   )}
                   {searchError && (
