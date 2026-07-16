@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const [topCategory, setTopCategory] = useState('-');
   const [topOpd, setTopOpd] = useState('-');
   const [activities, setActivities] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -59,8 +60,55 @@ export default function AdminDashboard() {
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Sistem Kendali Aplikasi Lapor Kabupaten Dompu</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn-secondary" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><BellRing size={18}/> {activities.length} Notifikasi</button>
+        <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="btn-secondary" 
+            style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}
+          >
+            <BellRing size={18}/> {activities.length} Notifikasi
+            {activities.length > 0 && (
+              <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'var(--error-color)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>
+                {activities.length}
+              </span>
+            )}
+          </button>
+          
+          {/* Notification Dropdown */}
+          {showNotifications && (
+            <div style={{
+              position: 'absolute',
+              top: '110%',
+              right: 0,
+              width: '320px',
+              background: '#fff',
+              borderRadius: '1rem',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              border: '1px solid var(--border-color)',
+              zIndex: 100,
+              overflow: 'hidden'
+            }}>
+              <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Notifikasi Terbaru
+              </div>
+              <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                {activities.length > 0 ? activities.map((act, i) => (
+                  <div key={i} style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                    <p style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--primary-color)' }}>{act.ticket_id}</p>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Laporan baru masuk dari <strong>{act.reporter_name || 'Warga'}</strong></p>
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(act.created_at).toLocaleString('id-ID')}</p>
+                  </div>
+                )) : (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    Belum ada notifikasi
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '0.75rem', textAlign: 'center', background: '#f8fafc', borderTop: '1px solid var(--border-color)' }}>
+                <a href="/admin/laporan" style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 'bold', textDecoration: 'none' }}>Lihat Semua Laporan</a>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
