@@ -139,7 +139,19 @@ export default function PantauLaporanOPD() {
                 <div>
                   <h4 style={{ marginBottom: '1rem', fontSize: '1rem', color: 'var(--primary-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Progres Tindak Lanjut</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {selectedReport.report_progress.sort((a:any, b:any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((prog: any, idx: number) => (
+                    {selectedReport.report_progress.sort((a:any, b:any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((prog: any, idx: number) => {
+                      let parsedNote = prog.description;
+                      let progressPercent = null;
+                      
+                      if (prog.description) {
+                        const match = prog.description.match(/^\[(\d+)%\] (.*)$/);
+                        if (match) {
+                          progressPercent = match[1];
+                          parsedNote = match[2];
+                        }
+                      }
+
+                      return (
                       <div key={idx} style={{ padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--border-color)', background: prog.status === 'COMPLETED' ? '#f0fdf4' : '#f8fafc' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                           <strong style={{ color: 'var(--primary-color)' }}>{prog.status === 'COMPLETED' ? 'Tugas Selesai' : 'Sedang Dikerjakan'}</strong>
@@ -148,8 +160,21 @@ export default function PantauLaporanOPD() {
                         <p style={{ fontSize: '0.9rem', margin: '0 0 0.5rem 0' }}>
                           Petugas Lapangan: <strong>{prog.profiles?.name || 'Tim OPD'}</strong>
                         </p>
-                        {prog.description && (
-                          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Catatan: {prog.description}</p>
+                        
+                        {progressPercent && (
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--primary-color)', marginBottom: '0.25rem', fontWeight: 'bold' }}>
+                              <span>Progres Pengerjaan</span>
+                              <span>{progressPercent}%</span>
+                            </div>
+                            <div style={{ width: '100%', background: '#e2e8f0', borderRadius: '999px', height: '6px' }}>
+                              <div style={{ width: `${progressPercent}%`, background: 'var(--primary-color)', height: '100%', borderRadius: '999px' }}></div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {parsedNote && (
+                          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Catatan: {parsedNote}</p>
                         )}
                         {prog.evidence_url && (
                           <div style={{ marginTop: '0.5rem' }}>
@@ -158,7 +183,7 @@ export default function PantauLaporanOPD() {
                           </div>
                         )}
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               )}

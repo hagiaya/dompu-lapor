@@ -14,6 +14,11 @@ export default function PetugasDashboard() {
   const [photoFiles, setPhotoFiles] = useState<{ [key: string]: File | null }>({});
   const [isSubmitting, setIsSubmitting] = useState<{ [key: string]: boolean }>({});
 
+  // Progress states
+  const [progressPercentage, setProgressPercentage] = useState<{ [key: string]: number }>({});
+  const [progressNote, setProgressNote] = useState<{ [key: string]: string }>({});
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState<{ [key: string]: boolean }>({});
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -28,13 +33,25 @@ export default function PetugasDashboard() {
     const { data: pData } = await supabase.from('report_progress')
       .select(`
         id, report_id, status, description, created_at,
-        reports ( ticket_id, complaint, lat, lng )
+        reports!inner ( ticket_id, complaint, lat, lng, status )
       `)
       .eq('status', 'IN_PROGRESS')
       .eq('employee_id', user.id)
+      .eq('reports.status', 'IN_PROGRESS')
       .order('created_at', { ascending: false });
       
-    if (pData) setTasks(pData);
+    if (pData) {
+      // Deduplicate by report_id so we only show one card per report (the latest one)
+      const uniqueTasks: any[] = [];
+      const seenReports = new Set();
+      pData.forEach(task => {
+        if (!seenReports.has(task.report_id)) {
+          seenReports.add(task.report_id);
+          uniqueTasks.push(task);
+        }
+      });
+      setTasks(uniqueTasks);
+    }
 
     // Fetch completed count for this employee
     const { count } = await supabase.from('report_progress')
@@ -49,6 +66,33 @@ export default function PetugasDashboard() {
 
   const handlePhotoSelect = (taskId: string, file: File) => {
     setPhotoFiles(prev => ({ ...prev, [taskId]: file }));
+  };
+
+  const handleUpdateProgress = async (taskId: string, reportId: string) => {
+    setIsUpdatingProgress(prev => ({ ...prev, [taskId]: true }));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const res = await fetch('/api/petugas/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          reportId: reportId,
+          employeeId: user?.id,
+          progressPercentage: progressPercentage[taskId] || 50,
+          progressNote: progressNote[taskId] || ''
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      alert('Progres berhasil disimpan!');
+      setProgressNote(prev => ({ ...prev, [taskId]: '' }));
+      fetchData(); // Refresh to show latest update
+    } catch (err: any) {
+      console.error(err);
+      alert('Gagal menyimpan progres: ' + (err.message || 'Kesalahan sistem'));
+    }
+    setIsUpdatingProgress(prev => ({ ...prev, [taskId]: false }));
   };
 
   const handleSelesai = async (progressId: string, reportId: string) => {
@@ -157,6 +201,38 @@ export default function PetugasDashboard() {
                      <Navigation size={16}/> Buka Maps
                    </button>
                  )}
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginBottom: '1.25rem' }}>
+                <h4 style={{ marginBottom: '0.75rem', fontSize: '0.95rem' }}>Lapor Progres Pekerjaan</h4>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                   <input 
+                     type="range" min="1" max="99" 
+                     value={progressPercentage[task.id] || 50} 
+                     onChange={(e) => setProgressPercentage(prev => ({ ...prev, [task.id]: parseInt(e.target.value)}))} 
+                     style={{ flex: 1, accentColor: 'var(--primary-color)' }} 
+                   />
+                   <span style={{ fontWeight: 'bold', width: '40px', textAlign: 'right', color: 'var(--primary-color)' }}>{progressPercentage[task.id] || 50}%</span>
+                </div>
+                
+                <input 
+                  type="text" 
+                  placeholder="Catatan progres (misal: Sedang menggali lubang)" 
+                  className="form-input" 
+                  value={progressNote[task.id] || ''} 
+                  onChange={(e) => setProgressNote(prev => ({ ...prev, [task.id]: e.target.value}))} 
+                  style={{ marginBottom: '0.75rem' }} 
+                />
+                
+                <button 
+                  onClick={() => handleUpdateProgress(task.id, task.report_id)} 
+                  disabled={isUpdatingProgress[task.id]} 
+                  className="btn-secondary" 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', opacity: isUpdatingProgress[task.id] ? 0.7 : 1 }}
+                >
+                  {isUpdatingProgress[task.id] ? 'Menyimpan...' : 'Simpan Progres'}
+                </button>
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
