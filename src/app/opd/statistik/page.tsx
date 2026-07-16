@@ -32,17 +32,32 @@ export default function StatistikOPD() {
   const [loading, setLoading] = useState(true);
   const [totalMasuk, setTotalMasuk] = useState(0);
   const [totalSelesai, setTotalSelesai] = useState(0);
+  const [avgResponseTimeStr, setAvgResponseTimeStr] = useState('0 Jam');
+  const [avgResponseTimeDiff, setAvgResponseTimeDiff] = useState('');
   
   // Data chart statis/default jika belum ada data
   const [masukBulanan, setMasukBulanan] = useState<number[]>([0,0,0,0,0,0,0,0,0,0,0,0]);
   const [selesaiBulanan, setSelesaiBulanan] = useState<number[]>([0,0,0,0,0,0,0,0,0,0,0,0]);
+  const [weeklyResponseData, setWeeklyResponseData] = useState<number[]>([0,0,0,0]);
 
   useEffect(() => {
     async function fetchData() {
-      // Kita fetch semua report tahun ini untuk simplicity
+      // 1. Dapatkan OPD yang sedang login
+      const { data: { user } } = await supabase.auth.getUser();
+      let currentOpdId = null;
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('opd_id').eq('id', user.id).single();
+        if (profile) currentOpdId = profile.opd_id;
+      }
+
+      // 2. Fetch semua report tahun ini
       const currentYear = new Date().getFullYear();
-      const { data: reports } = await supabase.from('reports').select('id, status, created_at')
-        .gte('created_at', `${currentYear}-01-01T00:00:00Z`);
+      let query = supabase.from('reports').select('id, status, created_at, report_progress(created_at)').gte('created_at', `${currentYear}-01-01T00:00:00Z`);
+      if (currentOpdId) {
+        query = query.eq('opd_id', currentOpdId);
+      }
+      
+      const { data: reports } = await query;
       
       if (reports) {
         setTotalMasuk(reports.length);
@@ -52,17 +67,52 @@ export default function StatistikOPD() {
 
         const mBln = [0,0,0,0,0,0,0,0,0,0,0,0];
         const sBln = [0,0,0,0,0,0,0,0,0,0,0,0];
+        
+        let totalResponseHours = 0;
+        let respondedCount = 0;
+        const weeklyResponses = [0,0,0,0]; // 4 minggu dalam bulan berjalan
+        const weeklyCounts = [0,0,0,0];
+        const currentMonth = new Date().getMonth();
 
         reports.forEach(r => {
-          const m = new Date(r.created_at).getMonth();
+          const reportDate = new Date(r.created_at);
+          const m = reportDate.getMonth();
           mBln[m] += 1;
           if (r.status === 'COMPLETED') {
             sBln[m] += 1;
+          }
+
+          // Hitung waktu respons jika ada progress
+          if (r.report_progress && r.report_progress.length > 0) {
+            // Cari progress pertama
+            const firstProgress = r.report_progress.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+            const diffHours = (new Date(firstProgress.created_at).getTime() - reportDate.getTime()) / (1000 * 60 * 60);
+            
+            totalResponseHours += diffHours;
+            respondedCount++;
+
+            // Masukkan ke statistik mingguan jika laporan di bulan ini
+            if (m === currentMonth) {
+              const date = reportDate.getDate();
+              const week = Math.min(Math.floor((date - 1) / 7), 3); // 0, 1, 2, 3
+              weeklyResponses[week] += diffHours;
+              weeklyCounts[week] += 1;
+            }
           }
         });
 
         setMasukBulanan(mBln);
         setSelesaiBulanan(sBln);
+
+        if (respondedCount > 0) {
+          const avg = totalResponseHours / respondedCount;
+          setAvgResponseTimeStr(`${avg.toFixed(1)} Jam`);
+        } else {
+          setAvgResponseTimeStr('0 Jam');
+        }
+
+        const avgWeekly = weeklyResponses.map((total, i) => weeklyCounts[i] > 0 ? Number((total / weeklyCounts[i]).toFixed(1)) : 0);
+        setWeeklyResponseData(avgWeekly);
       }
       setLoading(false);
     }
@@ -98,7 +148,7 @@ export default function StatistikOPD() {
     datasets: [
       {
         label: 'Rata-rata Waktu Respons (Jam)',
-        data: [4.2, 3.8, 3.1, 2.5], // Tetap mock untuk sementara
+        data: weeklyResponseData,
         backgroundColor: 'rgba(245, 158, 11, 0.8)', // warning-color
         borderRadius: 4,
       }
@@ -137,8 +187,8 @@ export default function StatistikOPD() {
             </div>
             <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '1.25rem', borderLeft: '5px solid var(--warning-color)' }}>
                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>Rata-rata Waktu Respons</p>
-               <h2 style={{ fontSize: '2.5rem', color: 'var(--primary-color)', margin: '0.5rem 0', fontWeight: '900' }}>2.5 Jam</h2>
-               <p style={{ color: 'var(--success-color)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 'bold' }}><TrendingUp size={14}/> Lebih cepat 30 menit</p>
+               <h2 style={{ fontSize: '2.5rem', color: 'var(--primary-color)', margin: '0.5rem 0', fontWeight: '900' }}>{avgResponseTimeStr}</h2>
+               <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 'bold' }}><TrendingUp size={14}/> Dihitung dari log progres</p>
             </div>
             <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '1.25rem', borderLeft: '5px solid var(--secondary-color)' }}>
                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>Total Diselesaikan (Tahun Ini)</p>
