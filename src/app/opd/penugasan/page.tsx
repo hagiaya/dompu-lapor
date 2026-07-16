@@ -65,31 +65,19 @@ export default function PenugasanOPD() {
     
     setIsSubmitting(true);
     
-    // 1. Update report status to IN_PROGRESS
-    const { error: rError } = await supabase.from('reports')
-      .update({ status: 'IN_PROGRESS' })
-      .eq('id', selectedReportId);
-
-    if (rError) {
-      console.error(rError);
-      alert('Gagal mengupdate status laporan.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    // 2. Insert into report_progress
-    const { error: pError } = await supabase.from('report_progress')
-      .insert({
-        report_id: selectedReportId,
-        status: 'IN_PROGRESS',
-        description: instruction,
-        employee_id: selectedEmployeeId
+    try {
+      const res = await fetch('/api/opd/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportId: selectedReportId,
+          employeeId: selectedEmployeeId,
+          instruction: instruction
+        })
       });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
 
-    if (pError) {
-      console.error(pError);
-      alert('Gagal membuat penugasan.');
-    } else {
       alert('Penugasan berhasil dibuat!');
       // Reset form
       setSelectedReportId('');
@@ -97,6 +85,9 @@ export default function PenugasanOPD() {
       setInstruction('');
       // Refresh data
       fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert('Gagal membuat penugasan: ' + (err.message || 'Kesalahan sistem'));
     }
     setIsSubmitting(false);
   };
