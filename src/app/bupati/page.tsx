@@ -11,6 +11,23 @@ export default function BupatiDashboard() {
     completed: 0
   });
   const [urgentReport, setUrgentReport] = useState<any>(null);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [isSendingBroadcast, setIsSendingBroadcast] = useState(false);
+
+  const handleSendBroadcast = async () => {
+    if (!broadcastMessage.trim()) return;
+    setIsSendingBroadcast(true);
+    
+    const { error } = await supabase.from('broadcasts').insert([{ message: broadcastMessage }]);
+    
+    setIsSendingBroadcast(false);
+    if (!error) {
+      alert('Instruksi berhasil dikirim ke seluruh OPD!');
+      setBroadcastMessage('');
+    } else {
+      alert('Gagal mengirim instruksi: ' + error.message);
+    }
+  };
 
   useEffect(() => {
     async function fetchStats() {
@@ -120,8 +137,23 @@ export default function BupatiDashboard() {
              <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', marginBottom: '1rem' }}>
               <Megaphone size={20} color="var(--secondary-color)" /> Pesan Broadcast Eksekutif
             </h2>
-            <textarea className="form-input" rows={4} placeholder="Kirim instruksi khusus ke seluruh Kepala OPD secara instan..." style={{ marginBottom: '1rem' }}></textarea>
-            <button className="btn-primary" style={{ width: '100%' }}>Kirim Instruksi</button>
+            <textarea 
+              className="form-input" 
+              rows={4} 
+              placeholder="Kirim instruksi khusus ke seluruh Kepala OPD secara instan..." 
+              style={{ marginBottom: '1rem' }}
+              value={broadcastMessage}
+              onChange={(e) => setBroadcastMessage(e.target.value)}
+              disabled={isSendingBroadcast}
+            ></textarea>
+            <button 
+              className="btn-primary" 
+              style={{ width: '100%' }}
+              onClick={handleSendBroadcast}
+              disabled={isSendingBroadcast || !broadcastMessage.trim()}
+            >
+              {isSendingBroadcast ? 'Mengirim...' : 'Kirim Instruksi'}
+            </button>
           </div>
         </div>
       </div>

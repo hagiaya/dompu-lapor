@@ -1,7 +1,26 @@
 'use client';
 import { Briefcase, Eye, ClipboardList, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function OPDDashboard() {
+  const [latestBroadcast, setLatestBroadcast] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchBroadcast() {
+      const { data } = await supabase.from('broadcasts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (data) {
+        setLatestBroadcast(data);
+      }
+    }
+    fetchBroadcast();
+  }, []);
+
   return (
     <div style={{ padding: '2.5rem', minHeight: '100vh', background: 'var(--background)' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', background: 'var(--surface)', padding: '1.5rem 2.5rem', borderRadius: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
@@ -12,6 +31,17 @@ export default function OPDDashboard() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Dinas Pekerjaan Umum dan Penataan Ruang (PUPR)</p>
         </div>
       </header>
+
+      {latestBroadcast && (
+        <div style={{ marginBottom: '2.5rem', padding: '1.5rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <AlertTriangle size={24} color="#1d4ed8" style={{ marginTop: '0.25rem' }} />
+          <div>
+            <h3 style={{ color: '#1e3a8a', fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Instruksi Khusus Bupati</h3>
+            <p style={{ color: '#1e40af', fontSize: '1rem' }}>{latestBroadcast.message}</p>
+            <p style={{ color: '#60a5fa', fontSize: '0.85rem', marginTop: '0.5rem' }}>Diterima pada {new Date(latestBroadcast.created_at).toLocaleString('id-ID')}</p>
+          </div>
+        </div>
+      )}
 
       {/* Analytics Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
