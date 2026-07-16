@@ -133,14 +133,13 @@ export default function Home() {
   const filteredVillages = villages.filter(v => v.district_id === selectedDistrict);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#cbd5e1', display: 'flex', justifyContent: 'center' }}>
-      {/* Mobile Device Frame Simulation */}
-      <div style={{ width: '100%', maxWidth: '430px', background: 'var(--background)', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 0 40px rgba(0,0,0,0.15)', overflowX: 'hidden' }}>
-        
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', justifyContent: 'center', padding: '0' }}>
+      {/* Responsive Container */}
+      <div style={{ width: '100%', maxWidth: '700px', background: 'var(--background)', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 0 20px rgba(0,0,0,0.05)', minHeight: '100vh' }}>
         {/* Header / Top Bar */}
-        <header style={{ padding: '1rem 1.25rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
-          <h2 style={{ color: 'var(--primary-color)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Image src="/logo copy.jpeg" alt="SiMAJU Logo" width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover' }} />
+        <header style={{ padding: '1.25rem 1.5rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          <h2 style={{ color: 'var(--primary-color)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Image src="/logo copy.jpeg" alt="SiMAJU Logo" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover' }} />
             SiMAJU
           </h2>
           <Link href="/login" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>
@@ -149,7 +148,7 @@ export default function Home() {
         </header>
 
         {/* Scrollable Content */}
-        <main style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', paddingBottom: '3rem' }}>
+        <main style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column' }}>
           
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <h1 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '0.75rem', color: 'var(--primary-color)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>
@@ -193,7 +192,7 @@ export default function Home() {
                       <p>{submitMessage}</p>
                     </div>
                   )}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={16} /> Nama Lengkap</label>
                       <input type="text" name="reporter_name" className="form-input" placeholder="Sesuai KTP" required />
@@ -204,7 +203,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> Kecamatan</label>
                       <select name="district_id" className="form-input" required value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)}>
@@ -297,8 +296,8 @@ export default function Home() {
           {/* Edukasi & Statistik */}
           <h2 style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>Proses Cepat & Tepat</h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
-             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: '1rem', borderLeft: '4px solid var(--secondary-color)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '1rem', borderRadius: '1rem', borderTop: '4px solid var(--secondary-color)' }}>
                <div style={{ width: '48px', height: '48px', background: 'var(--secondary-color)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}><MessageSquarePlus size={24}/></div>
                <div>
                  <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>1. Tulis Laporan</h3>
@@ -306,7 +305,7 @@ export default function Home() {
                </div>
              </div>
              
-             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: '1rem', borderLeft: '4px solid var(--warning-color)' }}>
+             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '1rem', borderRadius: '1rem', borderTop: '4px solid var(--warning-color)' }}>
                <div style={{ width: '48px', height: '48px', background: 'var(--warning-color)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}><Clock size={24}/></div>
                <div>
                  <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>2. Proses Instansi</h3>
@@ -314,7 +313,7 @@ export default function Home() {
                </div>
              </div>
              
-             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: '1rem', borderLeft: '4px solid var(--success-color)' }}>
+             <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '1rem', borderRadius: '1rem', borderTop: '4px solid var(--success-color)' }}>
                <div style={{ width: '48px', height: '48px', background: 'var(--success-color)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}><CheckCircle size={24}/></div>
                <div>
                  <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>3. Selesai & Bukti</h3>
@@ -323,14 +322,13 @@ export default function Home() {
              </div>
           </div>
 
-          <div className="glass-panel" style={{ padding: '2rem 1.5rem', borderRadius: '1.25rem', background: '#1e293b', color: 'white', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+          <div className="glass-panel" style={{ padding: '2rem 1.5rem', borderRadius: '1.25rem', background: '#1e293b', color: 'white', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', alignItems: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <TrendingUp size={32} color="var(--secondary-color)" style={{ marginBottom: '0.5rem', margin: '0 auto' }} />
               <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>{totalAduan.toLocaleString('id-ID')}</p>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Aduan Masuk</p>
             </div>
-            <div style={{ width: '80%', height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
               <CheckCircle size={32} color="var(--success-color)" style={{ marginBottom: '0.5rem', margin: '0 auto' }} />
               <p style={{ fontSize: '3rem', fontWeight: '900', color: 'white', lineHeight: 1, marginBottom: '0.5rem' }}>{persenSelesai.toFixed(1).replace('.0', '')}%</p>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Diselesaikan</p>
