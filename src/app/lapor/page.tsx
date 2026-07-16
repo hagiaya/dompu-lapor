@@ -39,17 +39,18 @@ export default function Home() {
       imgFormData.append('image', photoFile);
       
       try {
-        const imgBbKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || '2960a369656fb39fbd0c885e34be6228'; // fallback demo key
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgBbKey}`, {
+        const res = await fetch(`/api/upload`, {
           method: 'POST',
           body: imgFormData
         });
         const data = await res.json();
         if (data.success) {
-          uploadedPhotoUrl = data.data.url;
+          uploadedPhotoUrl = data.url;
+        } else {
+          console.error("Upload failed", data.error);
         }
       } catch (err) {
-        console.error("ImgBB error", err);
+        console.error("Upload error", err);
       }
     }
 

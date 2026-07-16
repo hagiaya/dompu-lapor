@@ -60,19 +60,22 @@ export default function PetugasDashboard() {
     try {
       const imgFormData = new FormData();
       imgFormData.append('image', file);
-      const imgBbKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || '2960a369656fb39fbd0c885e34be6228';
-      
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgBbKey}`, {
+      const res = await fetch(`/api/upload`, {
         method: 'POST',
         body: imgFormData
       });
       const data = await res.json();
       if (data.success) {
-        uploadedPhotoUrl = data.data.url;
+        uploadedPhotoUrl = data.url;
+      } else {
+        console.error("Upload failed", data.error);
+        alert('Gagal mengunggah foto bukti.');
+        setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
+        return;
       }
     } catch (err) {
-      console.error("ImgBB error", err);
-      alert('Gagal mengunggah gambar. Silakan coba lagi.');
+      console.error("Upload error", err);
+      alert('Terjadi kesalahan saat mengunggah foto.');
       setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
       return;
     }
