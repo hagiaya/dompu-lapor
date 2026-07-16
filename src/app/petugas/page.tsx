@@ -80,25 +80,23 @@ export default function PetugasDashboard() {
       return;
     }
 
-    // Update report_progress
-    const { error: pError } = await supabase.from('report_progress')
-      .update({ status: 'COMPLETED', evidence_url: uploadedPhotoUrl })
-      .eq('id', progressId);
-
-    // Update reports
-    const { error: rError } = await supabase.from('reports')
-      .update({ status: 'COMPLETED' })
-      .eq('id', reportId);
-
-    if (pError || rError) {
-      alert('Terjadi kesalahan saat menyelesaikan tugas.');
-      console.error(pError, rError);
-    } else {
+    try {
+      const res = await fetch('/api/petugas/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progressId, reportId, evidenceUrl: uploadedPhotoUrl })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      
       alert('Tugas berhasil diselesaikan!');
-      fetchData(); // Refresh tasks
+      fetchData(); // refresh list
+    } catch (err) {
+      console.error("Update error", err);
+      alert('Terjadi kesalahan saat mengupdate status.');
+    } finally {
+      setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
     }
-    
-    setIsSubmitting(prev => ({ ...prev, [progressId]: false }));
   };
 
   return (

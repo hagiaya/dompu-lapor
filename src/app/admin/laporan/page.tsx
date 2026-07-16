@@ -33,20 +33,38 @@ export default function LaporanAdmin() {
   };
 
   const updateStatus = async (reportId: string, newStatus: string) => {
-    const { error } = await supabase.from('reports').update({ status: newStatus }).eq('id', reportId);
-    if (!error) {
-      fetchData(); // refresh data
-    } else {
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData(); // refresh data
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
       console.error(error);
       alert('Gagal mengubah status');
     }
   };
 
   const assignOpd = async (reportId: string, opdId: string) => {
-    const { error } = await supabase.from('reports').update({ opd_id: opdId, status: 'ACCEPTED' }).eq('id', reportId);
-    if (!error) {
-      fetchData();
-    } else {
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ opd_id: opdId, status: 'ACCEPTED' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
       console.error(error);
       alert('Gagal assign OPD');
     }
