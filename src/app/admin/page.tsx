@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [topOpd, setTopOpd] = useState('-');
   const [activities, setActivities] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
   const [chartDataKategori, setChartDataKategori] = useState<any>(null);
   const [chartDataKecamatan, setChartDataKecamatan] = useState<any>(null);
   const [chartDataDesa, setChartDataDesa] = useState<any>(null);
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
 
         // Recent 5 activities
         setActivities(reports.slice(0, 5));
+        setHasUnread(reports.length > 0);
       }
 
       // Fetch all reports for stats
@@ -111,12 +113,15 @@ export default function AdminDashboard() {
         </div>
         <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
           <button 
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setHasUnread(false);
+            }}
             className="btn-secondary" 
             style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}
           >
             <BellRing size={18}/> {activities.length} Notifikasi
-            {activities.length > 0 && (
+            {hasUnread && activities.length > 0 && (
               <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'var(--error-color)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>
                 {activities.length}
               </span>
