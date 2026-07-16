@@ -60,13 +60,39 @@ export default function LaporanBupati() {
 
   return (
     <div style={{padding: '2rem'}}>
-      <h1 style={{fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)'}}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body { background: white; color: black; }
+          aside, button, nav { display: none !important; }
+          .glass-panel { 
+            box-shadow: none !important; 
+            border: 1px solid #ccc !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          main {
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+          th { background: #f8fafc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .print-header { display: block !important; text-align: center; margin-bottom: 2rem; }
+          .no-print { display: none !important; }
+        }
+        .print-header { display: none; }
+      `}} />
+      
+      <div className="print-header">
+        <h2>Pemerintah Kabupaten Dompu</h2>
+        <h1>Laporan Eksekutif Rekapitulasi Kinerja Bulanan</h1>
+      </div>
+
+      <h1 className="no-print" style={{fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)'}}>
         <FileText/> Laporan Eksekutif
       </h1>
       <div className="glass-panel" style={{marginTop: '2rem', padding: '1.5rem', borderRadius: '1rem'}}>
         <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center'}}>
           <h2 style={{fontSize: '1.2rem', color: 'var(--text-primary)'}}>Rekapitulasi Kinerja Bulanan Kabupaten Dompu</h2>
-          <button className="btn-primary" style={{background: 'var(--success-color)'}} onClick={() => alert('Fitur cetak PDF akan segera hadir!')}>
+          <button className="btn-primary no-print" style={{background: 'var(--success-color)'}} onClick={() => window.print()}>
             <Download size={16}/> Cetak PDF Laporan Resmi
           </button>
         </div>
