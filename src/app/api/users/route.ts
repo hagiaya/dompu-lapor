@@ -2,21 +2,21 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-// Initialize Supabase client with Service Role Key for admin privileges
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
 
 export async function POST(request: Request) {
   try {
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
     if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY is not configured in .env.local' }, { status: 500 });
+      return NextResponse.json({ error: 'Kunci Rahasia (SUPABASE_SERVICE_ROLE_KEY) belum ditambahkan di .env.local' }, { status: 500 });
     }
+
+    // Initialize Supabase client with Service Role Key for admin privileges
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
 
     const { email, password, name, role, opd_id } = await request.json();
 
