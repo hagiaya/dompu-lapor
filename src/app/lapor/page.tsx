@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { MessageSquarePlus, Search, Send, MapPin, User, Phone, CheckCircle, Shield, Clock, TrendingUp } from 'lucide-react';
+import { MessageSquarePlus, Search, Send, MapPin, User, Phone, CheckCircle, Shield, Clock, TrendingUp, Copy, Download } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
@@ -161,6 +161,37 @@ export default function Home() {
           </div>
 
           <div className="glass-panel" style={{ borderRadius: '1.25rem', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', marginBottom: '3rem' }}>
+            {ticketId ? (
+              <div style={{ padding: '3rem 2rem', background: '#ffffff', textAlign: 'center' }}>
+                <div style={{ padding: '2rem', background: '#dcfce7', color: '#166534', borderRadius: '1rem', marginBottom: '2rem', border: '1px solid #bbf7d0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                  <CheckCircle size={64} style={{ margin: '0 auto 1rem auto', color: '#15803d' }} />
+                  <p style={{ fontWeight: '900', marginBottom: '0.5rem', fontSize: '1.8rem' }}>Berhasil Dikirim!</p>
+                  <p style={{ fontSize: '1.1rem', marginTop: '1.5rem' }}>Kode Tiket Anda:</p>
+                  <strong style={{ fontSize: '2.5rem', letterSpacing: '4px', display: 'block', margin: '1rem 0', color: '#166534', userSelect: 'all' }}>{ticketId}</strong>
+                  <p style={{ fontSize: '1rem', marginTop: '1.5rem', fontWeight: '500' }}>Simpan kode ini untuk melacak laporan Anda.</p>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(ticketId); alert('Kode tiket berhasil disalin!'); }} style={{ padding: '0.75rem 1.5rem', background: '#fff', border: '2px solid var(--secondary-color)', color: 'var(--secondary-color)', borderRadius: '0.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <Copy size={20} /> Salin Tiket
+                  </button>
+                  <button type="button" onClick={() => {
+                    const element = document.createElement("a");
+                    const file = new Blob([`Tiket Laporan SiMAJU: ${ticketId}\nSimpan kode ini untuk melacak status laporan Anda.`], {type: 'text/plain'});
+                    element.href = URL.createObjectURL(file);
+                    element.download = `Tiket_SiMAJU_${ticketId}.txt`;
+                    element.click();
+                  }} style={{ padding: '0.75rem 1.5rem', background: 'var(--secondary-color)', border: '2px solid var(--secondary-color)', color: '#fff', borderRadius: '0.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <Download size={20} /> Download Tiket
+                  </button>
+                </div>
+
+                <button type="button" onClick={() => { setTicketId(''); setActiveTab('buat'); }} className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1rem', borderRadius: '0.75rem', fontWeight: 'bold' }}>
+                  Kembali ke Halaman Utama
+                </button>
+              </div>
+            ) : (
+              <>
             {/* Tabs */}
             <div style={{ display: 'flex', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>
               <button 
@@ -179,20 +210,6 @@ export default function Home() {
 
             <div style={{ padding: '1.5rem', background: '#ffffff' }}>
               {activeTab === 'buat' ? (
-                ticketId ? (
-                  <div style={{ padding: '2rem 1rem', textAlign: 'center' }}>
-                    <div style={{ padding: '2rem', background: '#dcfce7', color: '#166534', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid #bbf7d0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                      <CheckCircle size={56} style={{ margin: '0 auto 1rem auto', color: '#15803d' }} />
-                      <p style={{ fontWeight: '900', marginBottom: '0.5rem', fontSize: '1.5rem' }}>Berhasil Dikirim!</p>
-                      <p style={{ fontSize: '1.1rem', marginTop: '1.5rem' }}>Kode Tiket Anda:</p>
-                      <strong style={{ fontSize: '2rem', letterSpacing: '2px', display: 'block', margin: '0.5rem 0', color: '#166534' }}>{ticketId}</strong>
-                      <p style={{ fontSize: '0.95rem', marginTop: '1.5rem', fontWeight: '500' }}>Simpan kode ini untuk melacak laporan Anda.</p>
-                    </div>
-                    <button onClick={() => setTicketId('')} className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1rem', borderRadius: '0.75rem', fontWeight: 'bold' }}>
-                      Kirim Laporan Lainnya
-                    </button>
-                  </div>
-                ) : (
                 <form onSubmit={handleSubmit}>
                   {submitMessage && !ticketId && (
                     <div style={{ padding: '1rem', background: '#fee2e2', color: '#991b1b', borderRadius: '0.75rem', marginBottom: '1rem', textAlign: 'center' }}>
@@ -270,7 +287,6 @@ export default function Home() {
                   </button>
                   <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '1rem', lineHeight: 1.4 }}>Notifikasi akan dikirim otomatis ke WA Anda.</p>
                 </form>
-                )
               ) : (
                 <form onSubmit={handleSearch} style={{ textAlign: 'center', padding: '2rem 0' }}>
                   <Search size={40} color="var(--text-secondary)" style={{ opacity: 0.2, margin: '0 auto 1rem auto' }} />
@@ -349,9 +365,13 @@ export default function Home() {
                 </form>
               )}
             </div>
+              </>
+            )}
           </div>
 
-          {/* Edukasi & Statistik */}
+          {!ticketId && (
+            <>
+              {/* Edukasi & Statistik */}
           <h2 style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>Proses Cepat & Tepat</h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
@@ -392,6 +412,8 @@ export default function Home() {
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase' }}>Diselesaikan</p>
             </div>
           </div>
+            </>
+          )}
 
         </main>
       </div>
