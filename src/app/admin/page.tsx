@@ -1,5 +1,6 @@
 'use client';
 import Map from '@/components/Map';
+import Link from 'next/link';
 import { Shield, Layers, LayoutDashboard, Send, MapPin, Activity, BellRing, PieChart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -147,11 +148,11 @@ export default function AdminDashboard() {
               </div>
               <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {activities.length > 0 ? activities.map((act, i) => (
-                  <div key={i} style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                  <Link href={`/admin/laporan`} key={i} style={{ display: 'block', padding: '1rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem', textDecoration: 'none' }}>
                     <p style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--primary-color)' }}>{act.ticket_id}</p>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Laporan baru masuk dari <strong>{act.reporter_name || 'Warga'}</strong></p>
                     <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(act.created_at).toLocaleString('id-ID')}</p>
-                  </div>
+                  </Link>
                 )) : (
                   <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                     Belum ada notifikasi
