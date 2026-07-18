@@ -25,7 +25,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <ProtectedRoute allowedRoles={['ADMIN']}>
       <div className="admin-layout-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)', position: 'relative' }}>
         
-        {/* Mobile Header */}
         <div className="mobile-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="32" height="32" style={{ borderRadius: '50%', objectFit: 'cover' }} />
@@ -36,7 +35,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        {/* Sidebar Overlay */}
         <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
 
         <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ width: '280px', background: 'var(--surface)', borderRight: '1px solid var(--border-color)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-sm)' }}>
