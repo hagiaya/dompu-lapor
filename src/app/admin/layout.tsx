@@ -28,7 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="mobile-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="32" height="32" style={{ borderRadius: '50%', objectFit: 'cover' }} />
-            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>SiMAJU</h2>
+            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>Si<span style={{ color: 'var(--success-color)' }}>MAJU</span></h2>
           </div>
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-color)', padding: '0.25rem' }}>
             {isSidebarOpen ? <X size={28} /> : <Menu size={28} />}
@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div style={{ marginBottom: '2.5rem', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="40" height="40" style={{ borderRadius: '50%', objectFit: 'cover' }} />
-            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>SiMAJU</h2>
+            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>Si<span style={{ color: 'var(--success-color)' }}>MAJU</span></h2>
           </div>
           <p style={{ color: 'var(--secondary-color)', fontSize: '0.9rem', fontWeight: '600', marginLeft: '3.25rem' }}>Admin Panel</p>
         </div>

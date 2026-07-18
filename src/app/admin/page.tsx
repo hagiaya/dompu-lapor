@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           <h1 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: '800' }}>
             <Shield size={28} color="var(--secondary-color)" /> Dashboard Admin Utama
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Sistem Kendali Aplikasi SiMAJU Kabupaten Dompu</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Sistem Kendali Aplikasi Si<span style={{ color: 'var(--success-color)', fontWeight: 'bold' }}>MAJU</span> Kabupaten Dompu</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
           <button 

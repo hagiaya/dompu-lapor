@@ -47,7 +47,7 @@ export default function PetugasLayout({ children }: { children: React.ReactNode 
         <header style={{ padding: '1rem 1.25rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="32" height="32" style={{ borderRadius: '50%', objectFit: 'cover' }} />
-            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>SiMAJU Petugas</h2>
+            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>Si<span style={{ color: 'var(--success-color)' }}>MAJU</span> Petugas</h2>
           </div>
           <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--error-color)', display: 'flex', alignItems: 'center' }}>
             <LogOut size={20} />
