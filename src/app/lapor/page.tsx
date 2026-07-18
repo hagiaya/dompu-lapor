@@ -155,8 +155,8 @@ export default function Home() {
             <h1 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '0.75rem', color: 'var(--primary-color)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>
               Sistem Informasi Masyarakat <br /> menuju <span style={{ color: 'var(--secondary-color)' }}>Dompu Maju</span>
             </h1>
-            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Sampaikan keluhan fasilitas publik Dompu. Cepat, Mudah, dan Transparan.
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: '1rem', fontWeight: '600' }}>
+              Lapor Cepat, DOMPU HEBAT
             </p>
           </div>
 
@@ -179,15 +179,21 @@ export default function Home() {
 
             <div style={{ padding: '1.5rem', background: '#ffffff' }}>
               {activeTab === 'buat' ? (
-                <form onSubmit={handleSubmit}>
-                  {ticketId && (
-                    <div style={{ padding: '1rem', background: '#dcfce7', color: '#166534', borderRadius: '0.75rem', marginBottom: '1rem', border: '1px solid #bbf7d0', textAlign: 'center' }}>
-                      <CheckCircle size={24} style={{ margin: '0 auto 0.5rem auto' }} />
-                      <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Berhasil Dikirim!</p>
-                      <p style={{ fontSize: '0.9rem' }}>Kode Tiket Anda: <strong style={{ fontSize: '1.1rem', letterSpacing: '1px' }}>{ticketId}</strong></p>
-                      <p style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>Simpan kode ini untuk melacak laporan.</p>
+                ticketId ? (
+                  <div style={{ padding: '2rem 1rem', textAlign: 'center' }}>
+                    <div style={{ padding: '2rem', background: '#dcfce7', color: '#166534', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid #bbf7d0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                      <CheckCircle size={56} style={{ margin: '0 auto 1rem auto', color: '#15803d' }} />
+                      <p style={{ fontWeight: '900', marginBottom: '0.5rem', fontSize: '1.5rem' }}>Berhasil Dikirim!</p>
+                      <p style={{ fontSize: '1.1rem', marginTop: '1.5rem' }}>Kode Tiket Anda:</p>
+                      <strong style={{ fontSize: '2rem', letterSpacing: '2px', display: 'block', margin: '0.5rem 0', color: '#166534' }}>{ticketId}</strong>
+                      <p style={{ fontSize: '0.95rem', marginTop: '1.5rem', fontWeight: '500' }}>Simpan kode ini untuk melacak laporan Anda.</p>
                     </div>
-                  )}
+                    <button onClick={() => setTicketId('')} className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1rem', borderRadius: '0.75rem', fontWeight: 'bold' }}>
+                      Kirim Laporan Lainnya
+                    </button>
+                  </div>
+                ) : (
+                <form onSubmit={handleSubmit}>
                   {submitMessage && !ticketId && (
                     <div style={{ padding: '1rem', background: '#fee2e2', color: '#991b1b', borderRadius: '0.75rem', marginBottom: '1rem', textAlign: 'center' }}>
                       <p>{submitMessage}</p>
@@ -264,6 +270,7 @@ export default function Home() {
                   </button>
                   <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '1rem', lineHeight: 1.4 }}>Notifikasi akan dikirim otomatis ke WA Anda.</p>
                 </form>
+                )
               ) : (
                 <form onSubmit={handleSearch} style={{ textAlign: 'center', padding: '2rem 0' }}>
                   <Search size={40} color="var(--text-secondary)" style={{ opacity: 0.2, margin: '0 auto 1rem auto' }} />

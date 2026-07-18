@@ -40,7 +40,11 @@ export default function OPDAdmin() {
       if (!error) {
         fetchOpds();
       } else {
-        alert('Gagal menghapus: ' + error.message);
+        if (error.message.includes('foreign key constraint')) {
+          alert('Gagal menghapus: OPD ini tidak bisa dihapus karena masih ada pengguna atau laporan yang terhubung. Hapus data terkait terlebih dahulu.');
+        } else {
+          alert('Gagal menghapus: ' + error.message);
+        }
       }
     }
   }

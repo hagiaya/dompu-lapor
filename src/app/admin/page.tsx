@@ -109,13 +109,13 @@ export default function AdminDashboard() {
           <h1 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: '800' }}>
             <Shield size={28} color="var(--secondary-color)" /> Dashboard Admin Utama
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Sistem Kendali Aplikasi Lapor Kabupaten Dompu</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginTop: '0.25rem' }}>Sistem Kendali Aplikasi SiMAJU Kabupaten Dompu</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
           <button 
             onClick={() => {
               setShowNotifications(!showNotifications);
-              setHasUnread(false);
+              if (!showNotifications) setHasUnread(false);
             }}
             className="btn-secondary" 
             style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {activities.length > 0 ? activities.map(act => (
-              <div key={act.ticket_id} style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+              <a href={`/admin/laporan?search=${act.ticket_id}`} key={act.ticket_id} style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', textDecoration: 'none', display: 'block' }} className="hover:bg-gray-50 transition-colors p-2 rounded-lg">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success-color)' }}></div>
                   <strong style={{ color: 'var(--primary-color)' }}>Tiket {act.ticket_id} Masuk</strong>
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
                 <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
                   {new Date(act.created_at).toLocaleString('id-ID')}
                 </p>
-              </div>
+              </a>
             )) : (
               <p style={{ color: 'var(--text-secondary)' }}>Belum ada aktivitas.</p>
             )}

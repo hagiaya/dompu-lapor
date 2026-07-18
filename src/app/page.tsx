@@ -36,7 +36,7 @@ export default function LandingPage() {
       <nav style={{ padding: '1.5rem 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.3)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Image src="/logo copy.jpeg" alt="SiMAJU Logo" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-          <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-color)', letterSpacing: '-0.5px' }}>SiMAJU</span>
+          <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-color)', letterSpacing: '-0.5px' }}>Si<span style={{ color: 'var(--success-color)' }}>MAJU</span></span>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link href="/login" style={{ padding: '0.6rem 1.25rem', color: 'var(--text-secondary)', fontWeight: '600', textDecoration: 'none', borderRadius: '0.5rem', transition: 'all 0.2s ease' }} className="hover:bg-gray-100">

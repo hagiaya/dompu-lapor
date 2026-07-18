@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Shield, Mail, Lock, LogIn, Loader2, ArrowLeft } from 'lucide-react';
+import { Shield, Mail, Lock, LogIn, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Login() {
@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,14 +87,24 @@ export default function Login() {
 
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Lock size={16}/> Kata Sandi</label>
-            <input 
-              type="password" 
-              className="form-input" 
-              placeholder="••••••••" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                className="form-input" 
+                placeholder="••••••••" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingRight: '3rem' }}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '1rem', fontSize: '1.05rem', marginTop: '1rem', borderRadius: '0.75rem', opacity: loading ? 0.7 : 1 }}>
