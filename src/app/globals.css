@@ -179,3 +179,57 @@ button {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   transform: translateX(6px);
 }
+
+/* Sidebar Responsiveness */
+.mobile-header {
+  display: none;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+  .admin-sidebar {
+    position: fixed !important;
+    top: 65px;
+    left: -280px;
+    height: calc(100vh - 65px);
+    z-index: 100;
+    transition: left 0.3s ease;
+    background: var(--surface) !important;
+  }
+  .admin-sidebar.open {
+    left: 0;
+  }
+  .sidebar-overlay {
+    display: none !important;
+  }
+  .sidebar-overlay.open {
+    display: block !important;
+    position: fixed;
+    top: 65px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 65px);
+    background: rgba(0,0,0,0.4);
+    z-index: 90;
+    backdrop-filter: blur(2px);
+  }
+  /* make main flex direction column to stack header and content */
+  .admin-layout-container {
+    flex-direction: column !important;
+  }
+}

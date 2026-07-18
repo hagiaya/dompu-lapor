@@ -1,13 +1,20 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, FileText, Layers, Users, Map as MapIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Layers, Users, Map as MapIcon, LogOut, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -16,8 +23,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
   return (
     <ProtectedRoute allowedRoles={['ADMIN']}>
-      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
-        <aside style={{ width: '280px', background: 'var(--surface)', borderRight: '1px solid var(--border-color)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="admin-layout-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)', position: 'relative' }}>
+        
+        {/* Mobile Header */}
+        <div className="mobile-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="32" height="32" style={{ borderRadius: '50%', objectFit: 'cover' }} />
+            <h2 style={{ color: 'var(--primary-color)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>SiMAJU</h2>
+          </div>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-color)', padding: '0.25rem' }}>
+            {isSidebarOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+
+        {/* Sidebar Overlay */}
+        <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
+
+        <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ width: '280px', background: 'var(--surface)', borderRight: '1px solid var(--border-color)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ marginBottom: '2.5rem', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="40" height="40" style={{ borderRadius: '50%', objectFit: 'cover' }} />
