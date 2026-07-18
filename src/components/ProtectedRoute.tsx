@@ -54,10 +54,6 @@ export default function ProtectedRoute({
           <Loader2 size={32} className="animate-spin" />
           <p style={{ fontWeight: '600' }}>Memverifikasi Akses...</p>
         </div>
-        <style dangerouslySetInnerHTML={{__html: `
-          .animate-spin { animation: spin 1s linear infinite; }
-          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        `}} />
       </div>
     );
   }
