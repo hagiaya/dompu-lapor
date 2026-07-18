@@ -69,7 +69,7 @@ export default function AdminDashboard() {
         const kecCounts: Record<string, number> = {};
         const desaCounts: Record<string, number> = {};
 
-        allReports.forEach(r => {
+        allReports.forEach((r: any) => {
            const cat = r.categories?.name || 'Lainnya';
            const kec = r.districts?.name || 'Lainnya';
            const desa = r.villages?.name || 'Lainnya';

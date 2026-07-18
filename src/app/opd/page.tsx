@@ -22,7 +22,7 @@ export default function OPDDashboard() {
         if (profile) {
           currentOpdId = profile.opd_id;
           setOpdId(profile.opd_id);
-          if (profile.opds) setOpdName(profile.opds.name);
+          if (profile.opds) setOpdName((profile.opds as any).name);
           else setOpdName('Semua Instansi (Global)');
         }
       }
