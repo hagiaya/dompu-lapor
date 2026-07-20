@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendWhatsAppMessage } from '@/lib/fonnte';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +22,17 @@ export async function POST(request: Request) {
       .update({ status: 'COMPLETED' })
       .eq('id', reportId);
     if (rErr) throw rErr;
+
+    // Fetch report to send WA
+    const { data: report } = await supabase.from('reports')
+      .select('reporter_wa, ticket_id, complaint')
+      .eq('id', reportId)
+      .single();
+      
+    if (report && report.reporter_wa) {
+      const message = `*Laporan Selesai Dikerjakan!*\n\nLaporan Anda dengan kode tiket *${report.ticket_id}* telah selesai ditangani oleh petugas.\n\n*Detail Keluhan:*\n${report.complaint || '-'}\n\nTerima kasih atas partisipasi Anda dalam membangun Dompu yang lebih baik.\n_Lapor Cepat, DOMPU HEBAT!_`;
+      await sendWhatsAppMessage(report.reporter_wa, message);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

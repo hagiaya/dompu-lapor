@@ -75,6 +75,22 @@ export default function Home() {
     } else {
       setTicketId(generatedTicket);
       setSubmitMessage('Laporan berhasil dikirim!');
+      
+      // Send WA Notification
+      try {
+        await fetch('/api/send-wa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            target: formData.get('reporter_wa'),
+            ticketId: generatedTicket,
+            complaint: formData.get('complaint')
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send WA notification', err);
+      }
+
       (e.target as HTMLFormElement).reset();
       setSelectedDistrict('');
       setLocation(null);

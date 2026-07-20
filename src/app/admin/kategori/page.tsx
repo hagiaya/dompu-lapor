@@ -8,6 +8,8 @@ export default function KategoriAdmin() {
   const [isAdding, setIsAdding] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -29,6 +31,18 @@ export default function KategoriAdmin() {
       fetchCategories();
     } else {
       alert('Gagal menambahkan kategori: ' + error.message);
+    }
+  }
+
+  async function handleUpdate(id: string) {
+    if (!editName.trim()) return;
+    const { error } = await supabase.from('categories').update({ name: editName }).eq('id', id);
+    if (!error) {
+      setEditingId(null);
+      setEditName('');
+      fetchCategories();
+    } else {
+      alert('Gagal memperbarui: ' + error.message);
     }
   }
 
@@ -75,10 +89,26 @@ export default function KategoriAdmin() {
           <tbody>
             {categories.map((kat, i) => (
             <tr key={kat.id || i} style={{ borderBottom: '1px solid var(--border-color)' }}>
-              <td style={{ padding: '1rem 0' }}><strong>{kat.name}</strong></td>
+              <td style={{ padding: '1rem 0' }}>
+                {editingId === kat.id ? (
+                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} style={{ padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '0.25rem' }} />
+                ) : (
+                  <strong>{kat.name}</strong>
+                )}
+              </td>
               <td style={{ padding: '1rem 0' }}>Keluhan terkait masalah {kat.name.toLowerCase()} publik.</td>
               <td style={{ padding: '1rem 0', display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => handleDelete(kat.id)} className="btn-secondary" style={{padding: '0.5rem', color: 'var(--error-color)'}}><Trash2 size={16}/></button>
+                {editingId === kat.id ? (
+                  <>
+                    <button onClick={() => handleUpdate(kat.id)} className="btn-primary" style={{padding: '0.5rem'}}>Simpan</button>
+                    <button onClick={() => setEditingId(null)} className="btn-secondary" style={{padding: '0.5rem'}}><X size={16}/></button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => { setEditingId(kat.id); setEditName(kat.name); }} className="btn-secondary" style={{padding: '0.5rem', color: 'var(--primary-color)'}}><Edit size={16}/></button>
+                    <button onClick={() => handleDelete(kat.id)} className="btn-secondary" style={{padding: '0.5rem', color: 'var(--error-color)'}}><Trash2 size={16}/></button>
+                  </>
+                )}
               </td>
             </tr>
             ))}
