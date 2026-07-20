@@ -3,8 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
     if (!supabaseServiceKey) {
       return NextResponse.json({ error: 'Missing SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
@@ -44,8 +45,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
     if (!supabaseServiceKey) {
       return NextResponse.json({ error: 'Missing SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
