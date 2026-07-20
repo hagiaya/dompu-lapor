@@ -32,3 +32,23 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+  try {
+    const params = await props.params;
+
+    const { error } = await supabase
+      .from('reports')
+      .delete()
+      .eq('id', params.id);
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Delete API error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

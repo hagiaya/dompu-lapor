@@ -1,5 +1,5 @@
 'use client';
-import { FileText, Search, Filter, Check, X } from 'lucide-react';
+import { FileText, Search, Filter, Check, X, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -67,6 +67,24 @@ export default function LaporanAdmin() {
     } catch (error) {
       console.error(error);
       alert('Gagal assign OPD');
+    }
+  };
+
+  const deleteReport = async (reportId: string) => {
+    if (!confirm('Yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menghapus laporan');
     }
   };
 
@@ -160,6 +178,9 @@ export default function LaporanAdmin() {
                             </>
                           )}
                           <button onClick={() => setSelectedReport(r)} className="btn-secondary" style={{padding: '0.5rem 1rem', fontSize: '0.85rem'}}>Detail</button>
+                          <button onClick={() => deleteReport(r.id)} className="btn-secondary" style={{padding: '0.5rem', color: 'var(--error-color)', borderColor: 'transparent'}} title="Hapus">
+                            <Trash2 size={16}/>
+                          </button>
                         </div>
                       </td>
                     </tr>
