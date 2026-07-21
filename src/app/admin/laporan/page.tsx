@@ -8,6 +8,9 @@ export default function LaporanAdmin() {
   const [opds, setOpds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -99,6 +102,13 @@ export default function LaporanAdmin() {
     }
   };
 
+  const filteredReports = reports.filter(r => {
+    const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
+    const matchesSearch = r.ticket_id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          r.reporter_name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
   return (
     <div style={{padding: '2rem', minHeight: '100vh', background: 'var(--background)'}}>
       <h1 style={{fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)'}}>
@@ -109,11 +119,23 @@ export default function LaporanAdmin() {
         <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem'}}>
           <div style={{display: 'flex', gap: '0.5rem'}}>
             <div className="form-group" style={{marginBottom: 0}}>
-              <input type="text" className="form-input" placeholder="Cari tiket..." style={{width: '250px'}}/>
+              <input type="text" className="form-input" placeholder="Cari tiket atau pelapor..." style={{width: '250px'}} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <button className="btn-secondary"><Search size={16}/></button>
           </div>
-          <button className="btn-secondary"><Filter size={16}/> Filter Status</button>
+          <div style={{ position: 'relative' }}>
+            <button onClick={() => setShowFilterMenu(!showFilterMenu)} className="btn-secondary">
+              <Filter size={16}/> {statusFilter === 'ALL' ? 'Filter Status' : statusFilter}
+            </button>
+            {showFilterMenu && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '150px', overflow: 'hidden' }}>
+                {['ALL', 'PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'].map(status => (
+                  <button key={status} onClick={() => { setStatusFilter(status); setShowFilterMenu(false); }} style={{ display: 'block', width: '100%', padding: '0.75rem 1rem', textAlign: 'left', background: statusFilter === status ? '#f1f5f9' : 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    {status === 'ALL' ? 'Semua Status' : status}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         
         {loading ? (
@@ -132,7 +154,7 @@ export default function LaporanAdmin() {
                 </tr>
               </thead>
               <tbody>
-                {reports.length > 0 ? reports.map(r => {
+                {filteredReports.length > 0 ? filteredReports.map(r => {
                   const colors = getStatusColor(r.status);
                   return (
                     <tr key={r.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
