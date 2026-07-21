@@ -65,11 +65,11 @@ export default function TugasBaruPetugas() {
           {tasks.length > 0 ? tasks.map(task => (
             <div key={task.id} className="glass-panel" style={{ padding: '1.25rem', borderRadius: '1.25rem', borderLeft: '4px solid var(--error-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <strong style={{ color: 'var(--primary-color)', fontSize: '0.9rem' }}>{task.reports?.ticket_id}</strong>
+                <strong style={{ color: 'var(--primary-color)', fontSize: '0.9rem' }}>{task.reports?.ticket_id || 'Detail Disembunyikan'}</strong>
                 <span style={{ color: 'var(--error-color)', fontSize: '0.75rem', fontWeight: 'bold' }}>Baru Saja</span>
               </div>
               <p style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: 1.3 }}>
-                {task.reports?.complaint.length > 60 ? task.reports?.complaint.substring(0, 60) + '...' : task.reports?.complaint}
+                {task.reports?.complaint ? (task.reports.complaint.length > 60 ? task.reports.complaint.substring(0, 60) + '...' : task.reports.complaint) : 'Detail laporan akan muncul setelah tugas diterima'}
               </p>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
                 {task.description || 'Tidak ada instruksi khusus.'}

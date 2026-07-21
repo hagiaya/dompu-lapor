@@ -38,12 +38,16 @@ export default function PenugasanOPD() {
 
     // Fetch reports assigned to THIS OPD
     const { data: rData } = await supabase.from('reports')
-      .select('id, ticket_id, complaint')
+      .select('id, ticket_id, complaint, report_progress(id)')
       .eq('status', 'ACCEPTED')
       .eq('opd_id', opdId)
       .order('created_at', { ascending: false });
     
-    if (rData) setReports(rData);
+    if (rData) {
+      // Filter out reports that already have an entry in report_progress
+      const unassignedReports = rData.filter(r => !r.report_progress || r.report_progress.length === 0);
+      setReports(unassignedReports);
+    }
 
     // Fetch employees in THIS OPD
     const { data: eData } = await supabase.from('profiles')
