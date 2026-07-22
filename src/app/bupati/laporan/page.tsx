@@ -6,6 +6,70 @@ import { supabase } from '@/lib/supabaseClient';
 export default function LaporanBupati() {
   const [monthlyStats, setMonthlyStats] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [downloadMonth, setDownloadMonth] = useState('ALL');
+  const [downloadYear, setDownloadYear] = useState(new Date().getFullYear().toString());
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      let query = supabase.from('reports').select(`
+        ticket_id, reporter_name, status, created_at,
+        categories ( name ),
+        opds ( name )
+      `).order('created_at', { ascending: false });
+
+      if (downloadYear) {
+        const year = parseInt(downloadYear);
+        if (downloadMonth === 'ALL') {
+          query = query.gte('created_at', `${year}-01-01T00:00:00Z`)
+                       .lt('created_at', `${year + 1}-01-01T00:00:00Z`);
+        } else {
+          const month = parseInt(downloadMonth);
+          const nextMonth = month === 12 ? 1 : month + 1;
+          const nextYear = month === 12 ? year + 1 : year;
+          query = query.gte('created_at', `${year}-${month.toString().padStart(2, '0')}-01T00:00:00Z`)
+                       .lt('created_at', `${nextYear}-${nextMonth.toString().padStart(2, '0')}-01T00:00:00Z`);
+        }
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const headers = ['Nomor Tiket', 'Pelapor', 'Kategori', 'Status', 'OPD Penanganan'];
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+          const values = [
+            row.ticket_id,
+            `"${row.reporter_name}"`,
+            `"${row.categories?.name || '-'}"`,
+            row.status,
+            `"${row.opds?.name || '-'}"`
+          ];
+          csvRows.push(values.join(','));
+        }
+        
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `Laporan_Eksekutif_${downloadMonth === 'ALL' ? 'Tahun' : 'Bulan_' + downloadMonth}_${downloadYear}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('Tidak ada data pada periode tersebut.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengunduh laporan.');
+    }
+    setIsDownloading(false);
+  };
 
   useEffect(() => {
     async function fetchMonthlyStats() {
@@ -92,9 +156,35 @@ export default function LaporanBupati() {
       <div className="glass-panel" style={{marginTop: '2rem', padding: '1.5rem', borderRadius: '1rem'}}>
         <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center'}}>
           <h2 style={{fontSize: '1.2rem', color: 'var(--text-primary)'}}>Rekapitulasi Kinerja Bulanan Kabupaten Dompu</h2>
-          <button className="btn-primary no-print" style={{background: 'var(--success-color)'}} onClick={() => window.print()}>
-            <Download size={16}/> Cetak PDF Laporan Resmi
-          </button>
+          <div className="no-print" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select className="form-input" style={{ padding: '0.5rem', width: 'auto' }} value={downloadMonth} onChange={e => setDownloadMonth(e.target.value)}>
+              <option value="ALL">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select className="form-input" style={{ padding: '0.5rem', width: 'auto' }} value={downloadYear} onChange={e => setDownloadYear(e.target.value)}>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+            <button className="btn-secondary" onClick={handleDownload} disabled={isDownloading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc' }}>
+              <Download size={16}/> {isDownloading ? 'Mengunduh...' : 'Unduh CSV'}
+            </button>
+            <button className="btn-primary" style={{background: 'var(--success-color)'}} onClick={() => window.print()}>
+              <Download size={16}/> Cetak PDF
+            </button>
+          </div>
         </div>
         
         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>

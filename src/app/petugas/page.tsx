@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 export default function PetugasDashboard() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newTasksCount, setNewTasksCount] = useState(0);
   
   // Stats
   const [completedCount, setCompletedCount] = useState(0);
@@ -60,6 +61,14 @@ export default function PetugasDashboard() {
       .eq('employee_id', user.id);
       
     setCompletedCount(count || 0);
+
+    // Fetch new tasks count (ACCEPTED)
+    const { count: newCount } = await supabase.from('report_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'ACCEPTED')
+      .eq('employee_id', user.id);
+      
+    setNewTasksCount(newCount || 0);
 
     setLoading(false);
   };
@@ -166,12 +175,34 @@ export default function PetugasDashboard() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Memuat tugas...</div>
-      ) : tasks.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'white', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
-          <AlertCircle size={32} style={{ margin: '0 auto 0.5rem auto', opacity: 0.5 }}/>
-          Tidak ada tugas aktif saat ini.
-        </div>
       ) : (
+        <>
+          {newTasksCount > 0 && (
+            <div style={{ 
+              background: '#fef2f2', 
+              border: '1px solid #f87171', 
+              padding: '1rem', 
+              borderRadius: '0.75rem', 
+              marginBottom: '1rem', 
+              display: 'flex', 
+              alignItems: 'flex-start',
+              gap: '0.75rem'
+            }}>
+              <AlertCircle size={20} color="#dc2626" style={{ marginTop: '0.1rem', flexShrink: 0 }} />
+              <div>
+                <h4 style={{ color: '#991b1b', margin: '0 0 0.25rem 0', fontWeight: 'bold' }}>Ada {newTasksCount} Tugas Baru!</h4>
+                <p style={{ color: '#b91c1c', margin: 0, fontSize: '0.9rem' }}>
+                  Silakan cek tab <strong>Tugas Baru</strong> di menu bawah untuk menerima penugasan dari OPD sebelum tugas tersebut muncul di sini.
+                </p>
+              </div>
+            </div>
+          )}
+          {tasks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'white', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
+              <AlertCircle size={32} style={{ margin: '0 auto 0.5rem auto', opacity: 0.5 }}/>
+              Tidak ada tugas aktif saat ini.
+            </div>
+          ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {tasks.map(task => (
             <div key={task.id} className="glass-panel" style={{ padding: '1.25rem', borderRadius: '1.25rem', borderTop: '4px solid var(--warning-color)' }}>

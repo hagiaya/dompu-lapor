@@ -1,5 +1,5 @@
 'use client';
-import { Layers, Plus, Edit, Trash2, X } from 'lucide-react';
+import { Layers, Plus, Edit, Trash2, X, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -10,6 +10,53 @@ export default function KategoriAdmin() {
   const [isLoading, setIsLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadReports = async () => {
+    setIsDownloading(true);
+    try {
+      const { data, error } = await supabase.from('reports').select(`
+        ticket_id, reporter_name, status,
+        categories ( name ),
+        opds ( name )
+      `).order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const headers = ['Nomor Tiket', 'Pelapor', 'Kategori', 'Status', 'OPD Penanganan'];
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+          const values = [
+            row.ticket_id,
+            `"${row.reporter_name}"`,
+            `"${row.categories?.name || '-'}"`,
+            row.status,
+            `"${row.opds?.name || '-'}"`
+          ];
+          csvRows.push(values.join(','));
+        }
+        
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'Data_Laporan_Keluhan.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('Belum ada data laporan untuk diunduh.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Gagal mengunduh data laporan.');
+    }
+    setIsDownloading(false);
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -63,7 +110,12 @@ export default function KategoriAdmin() {
       <div className="glass-panel" style={{marginTop: '2rem', padding: '1.5rem', borderRadius: '1rem'}}>
         
         {!isAdding ? (
-          <button onClick={() => setIsAdding(true)} className="btn-primary" style={{marginBottom: '1.5rem'}}><Plus size={16}/> Tambah Kategori Baru</button>
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <button onClick={() => setIsAdding(true)} className="btn-primary"><Plus size={16}/> Tambah Kategori Baru</button>
+            <button onClick={handleDownloadReports} disabled={isDownloading} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc' }}>
+              <Download size={16}/> {isDownloading ? 'Mengunduh...' : 'Download Data Laporan'}
+            </button>
+          </div>
         ) : (
           <div style={{ marginBottom: '1.5rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <input 
