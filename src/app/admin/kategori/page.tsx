@@ -27,7 +27,8 @@ export default function KategoriAdmin() {
         const headers = ['Nomor Tiket', 'Pelapor', 'Kategori', 'Status', 'OPD Penanganan'];
         const csvRows = [headers.join(',')];
         
-        for (const row of data) {
+        for (const r of data) {
+          const row: any = r;
           const values = [
             row.ticket_id,
             `"${row.reporter_name}"`,
