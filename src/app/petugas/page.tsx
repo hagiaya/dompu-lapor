@@ -176,7 +176,7 @@ export default function PetugasDashboard() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Memuat tugas...</div>
       ) : (
-        <>
+        <div style={{ width: '100%' }}>
           {newTasksCount > 0 && (
             <div style={{ 
               background: '#fef2f2', 
@@ -288,7 +288,7 @@ export default function PetugasDashboard() {
             </div>
           ))}
         </div>
-        </>
+        </div>
       )}
     </div>
   );
