@@ -290,7 +290,7 @@ export default function Home() {
                     <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', border: '2px dashed var(--border-color)', borderRadius: '0.75rem', background: '#f8fafc', cursor: 'pointer' }}>
                       <Camera size={32} color="var(--text-muted)" style={{ marginBottom: '0.5rem' }} />
                       <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{photoFile ? photoFile.name : 'Ketuk untuk mengambil foto'}</span>
-                      <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => {
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setPhotoFile(e.target.files[0]);
                         }

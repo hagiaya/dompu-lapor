@@ -42,15 +42,26 @@ export default function PetugasDashboard() {
       .order('created_at', { ascending: false });
       
     if (pData) {
-      // Deduplicate by report_id so we only show one card per report (the latest one)
+      // Group by report_id to find the instruction (oldest row) and current progress (newest row)
       const uniqueTasks: any[] = [];
-      const seenReports = new Set();
+      const reportsMap = new Map();
+      
       pData.forEach(task => {
-        if (!seenReports.has(task.report_id)) {
-          seenReports.add(task.report_id);
-          uniqueTasks.push(task);
+        if (!reportsMap.has(task.report_id)) {
+          reportsMap.set(task.report_id, []);
         }
+        reportsMap.get(task.report_id).push(task);
       });
+
+      for (const [reportId, tasksList] of reportsMap.entries()) {
+        const newestTask = tasksList[0]; // because pData is sorted DESC
+        const oldestTask = tasksList[tasksList.length - 1]; // This has the original instruction from OPD
+        
+        uniqueTasks.push({
+          ...newestTask,
+          instruction: oldestTask.description
+        });
+      }
       setTasks(uniqueTasks);
     }
 
@@ -209,7 +220,7 @@ export default function PetugasDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div>
                   <span style={{ background: '#fef3c7', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'inline-block' }}>{task.reports?.ticket_id}</span>
-                  <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: 1.3 }}>Instruksi: {task.description}</h3>
+                  <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: 1.3 }}>Instruksi: {task.instruction || task.description}</h3>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>Keluhan Warga: "{task.reports?.complaint}"</p>
                 </div>
               </div>
@@ -273,7 +284,7 @@ export default function PetugasDashboard() {
                   <p style={{ color: photoFiles[task.id] ? "var(--success-color)" : "var(--text-secondary)", fontSize: '0.85rem' }}>
                     {photoFiles[task.id] ? photoFiles[task.id]?.name : 'Ketuk untuk pilih foto'}
                   </p>
-                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => {
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
                     if (e.target.files && e.target.files[0]) handlePhotoSelect(task.id, e.target.files[0]);
                   }} />
                 </label>
