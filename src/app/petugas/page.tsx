@@ -34,7 +34,7 @@ export default function PetugasDashboard() {
     const { data: pData } = await supabase.from('report_progress')
       .select(`
         id, report_id, status, description, created_at,
-        reports!inner ( ticket_id, complaint, lat, lng, status )
+        reports!inner ( ticket_id, complaint, lat, lng, status, districts(name), villages(name) )
       `)
       .eq('status', 'IN_PROGRESS')
       .eq('employee_id', user.id)
@@ -98,7 +98,7 @@ export default function PetugasDashboard() {
         body: JSON.stringify({ 
           reportId: reportId,
           employeeId: user?.id,
-          progressPercentage: progressPercentage[taskId] || 50,
+          progressPercentage: progressPercentage[taskId] !== undefined ? progressPercentage[taskId] : 0,
           progressNote: progressNote[taskId] || ''
         })
       });
@@ -221,6 +221,9 @@ export default function PetugasDashboard() {
                 <div>
                   <span style={{ background: '#fef3c7', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'inline-block' }}>{task.reports?.ticket_id}</span>
                   <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: 1.3 }}>Instruksi: {task.instruction || task.description}</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '0.25rem' }}>
+                    <strong>Lokasi:</strong> Kecamatan {task.reports?.districts?.name || '-'}, Desa {task.reports?.villages?.name || '-'}
+                  </p>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>Keluhan Warga: "{task.reports?.complaint}"</p>
                 </div>
               </div>
@@ -250,12 +253,12 @@ export default function PetugasDashboard() {
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
                    <input 
-                     type="range" min="1" max="99" 
-                     value={progressPercentage[task.id] || 50} 
+                     type="range" min="0" max="100" 
+                     value={progressPercentage[task.id] !== undefined ? progressPercentage[task.id] : 0} 
                      onChange={(e) => setProgressPercentage(prev => ({ ...prev, [task.id]: parseInt(e.target.value)}))} 
                      style={{ flex: 1, accentColor: 'var(--primary-color)' }} 
                    />
-                   <span style={{ fontWeight: 'bold', width: '40px', textAlign: 'right', color: 'var(--primary-color)' }}>{progressPercentage[task.id] || 50}%</span>
+                   <span style={{ fontWeight: 'bold', width: '40px', textAlign: 'right', color: 'var(--primary-color)' }}>{progressPercentage[task.id] !== undefined ? progressPercentage[task.id] : 0}%</span>
                 </div>
                 
                 <input 

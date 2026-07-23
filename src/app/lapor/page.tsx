@@ -113,7 +113,7 @@ export default function Home() {
     
     const { data, error } = await supabase
       .from('reports')
-      .select('status, complaint, created_at, photo_url, report_progress(status, created_at, evidence_url)')
+      .select('status, complaint, created_at, photo_url, report_progress(status, created_at, evidence_url, description)')
       .eq('ticket_id', searchTicketId)
       .single();
       
@@ -322,25 +322,55 @@ export default function Home() {
                        <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: '1.5rem' }}>"{searchResult.complaint}"</p>
                        
                        {/* Timeline Progress Bar */}
-                       <div style={{ marginBottom: '2rem' }}>
-                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
-                           <span style={{ color: ['PENDING', 'DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Terkirim</span>
-                           <span style={{ color: ['DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Diteruskan</span>
-                           <span style={{ color: ['IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Dikerjakan</span>
-                           <span style={{ color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : '' }}>Selesai</span>
-                         </div>
-                         <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                           <div style={{ 
-                             height: '100%', 
-                             background: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--primary-color)',
-                             width: searchResult.status === 'PENDING' ? '15%' : searchResult.status === 'DISPOSISI' ? '40%' : searchResult.status === 'IN_PROGRESS' ? '70%' : searchResult.status === 'COMPLETED' ? '100%' : '0%',
-                             transition: 'width 0.5s ease-in-out'
-                           }}></div>
-                         </div>
-                         <p style={{ textAlign: 'right', fontSize: '0.75rem', color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--text-secondary)', fontWeight: 'bold', marginTop: '0.35rem' }}>
-                           {searchResult.status === 'PENDING' ? '15%' : searchResult.status === 'DISPOSISI' ? '40%' : searchResult.status === 'IN_PROGRESS' ? '70%' : searchResult.status === 'COMPLETED' ? '100%' : '0%'} {searchResult.status === 'COMPLETED' ? 'Tuntas' : 'Berjalan'}
-                         </p>
-                       </div>
+                       {(() => {
+                         let inProgressPercent = 70;
+                         let inProgressNote = '';
+                         if (searchResult.status === 'IN_PROGRESS' && searchResult.report_progress) {
+                           const latestProgress = searchResult.report_progress
+                             .filter((p: any) => p.status === 'IN_PROGRESS' && p.description && p.description.match(/\[\d+%\]/))
+                             .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+                             
+                           if (latestProgress) {
+                             const match = latestProgress.description.match(/\[(\d+)%\]/);
+                             if (match) {
+                               // Scale officer's 0-100% to the 40-100% range of the overall progress bar
+                               inProgressPercent = 40 + (parseInt(match[1], 10) * 0.6);
+                             }
+                             inProgressNote = latestProgress.description.replace(/\[\d+%\]\s*/, '');
+                           }
+                         }
+
+                         const barWidth = searchResult.status === 'PENDING' ? '15%' : searchResult.status === 'DISPOSISI' ? '40%' : searchResult.status === 'IN_PROGRESS' ? `${inProgressPercent}%` : searchResult.status === 'COMPLETED' ? '100%' : '0%';
+                         const pctText = searchResult.status === 'IN_PROGRESS' && inProgressNote ? `${Math.round((inProgressPercent - 40) / 0.6)}%` : barWidth;
+
+                         return (
+                           <div style={{ marginBottom: '2rem' }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+                               <span style={{ color: ['PENDING', 'DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Terkirim</span>
+                               <span style={{ color: ['DISPOSISI', 'IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Diteruskan</span>
+                               <span style={{ color: ['IN_PROGRESS', 'COMPLETED'].includes(searchResult.status) ? 'var(--primary-color)' : '' }}>Dikerjakan</span>
+                               <span style={{ color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : '' }}>Selesai</span>
+                             </div>
+                             <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                               <div style={{ 
+                                 height: '100%', 
+                                 background: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--primary-color)',
+                                 width: barWidth,
+                                 transition: 'width 0.5s ease-in-out'
+                               }}></div>
+                             </div>
+                             <p style={{ textAlign: 'right', fontSize: '0.75rem', color: searchResult.status === 'COMPLETED' ? 'var(--success-color)' : 'var(--text-secondary)', fontWeight: 'bold', marginTop: '0.35rem' }}>
+                               {pctText} {searchResult.status === 'COMPLETED' ? 'Tuntas' : 'Berjalan'}
+                             </p>
+                             {inProgressNote && searchResult.status === 'IN_PROGRESS' && (
+                               <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}><strong>Catatan Petugas:</strong></p>
+                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{inProgressNote}</p>
+                               </div>
+                             )}
+                           </div>
+                         );
+                       })()}
 
                        {/* Before / After Photos */}
                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

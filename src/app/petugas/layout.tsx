@@ -39,12 +39,11 @@ export default function PetugasLayout({ children }: { children: React.ReactNode 
   
   return (
     <ProtectedRoute allowedRoles={['EMPLOYEE']}>
-    <div style={{ minHeight: '100vh', background: '#cbd5e1', display: 'flex', justifyContent: 'center' }}>
-      {/* Mobile Device Frame Simulation */}
-      <div style={{ width: '100%', maxWidth: '430px', background: 'var(--background)', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 0 40px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--background)', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '768px', background: 'var(--background)', position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', boxShadow: '0 0 20px rgba(0,0,0,0.05)' }}>
         
         {/* Header / Top Bar */}
-        <header style={{ padding: '1rem 1.25rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+        <header style={{ position: 'sticky', top: 0, padding: '1rem 1.25rem', background: 'var(--surface)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 40 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <img src="/logo copy.jpeg" alt="SiMAJU Logo" width="32" height="32" style={{ borderRadius: '50%', objectFit: 'cover' }} />
             <h2 style={{ color: 'var(--primary-color)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>Si<span style={{ color: 'var(--success-color)' }}>MAJU</span> Petugas</h2>
@@ -55,12 +54,12 @@ export default function PetugasLayout({ children }: { children: React.ReactNode 
         </header>
 
         {/* Scrollable Main Content */}
-        <main style={{ flex: 1, padding: '0', overflowY: 'auto', paddingBottom: '90px' }}>
+        <main style={{ flex: 1, padding: '0', paddingBottom: '90px' }}>
           {children}
         </main>
 
         {/* Bottom Navigation Bar */}
-        <nav style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--surface)', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-around', padding: '0.75rem 0', zIndex: 10, boxShadow: '0 -4px 10px rgba(0,0,0,0.03)' }}>
+        <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '768px', background: 'var(--surface)', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-around', padding: '0.75rem 0', zIndex: 40, boxShadow: '0 -4px 10px rgba(0,0,0,0.03)', paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
           
           <Link href="/petugas" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', color: pathname === '/petugas' ? 'var(--secondary-color)' : 'var(--text-secondary)', textDecoration: 'none' }}>
             <ClipboardCheck size={24} />
